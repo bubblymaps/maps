@@ -1,7 +1,4 @@
-
-### **SECURITY.md**
-
-# Security Policy for Bubbly Maps 🔒
+# Our security policies
 
 ## Reporting a Vulnerability
 
@@ -23,7 +20,3 @@ We will respond promptly and work with you to resolve the issue.
 
 Only the latest release is actively maintained for security fixes.  
 Older versions may not receive updates.
-
----
-
-Thank you for helping keep Bubbly Maps safe!
