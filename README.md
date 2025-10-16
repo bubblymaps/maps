@@ -2,6 +2,8 @@
 
 A simple, open-source maps platform designed for mapping water fountains.
 
+Access the official maps site at https://bubblymaps.org
+
 <img width="2555" height="1276" alt="image" src="https://github.com/user-attachments/assets/466b487e-2a57-463b-a959-dfa9705a71a4" />
 
 ## Features
@@ -51,11 +53,11 @@ Bubbly Maps is a project by [Linus Kang](https://lkang.au) and is licensed under
 
 **You may:**
 
-- **Share** — copy and redistribute the material in any medium or format  
-- **Adapt** — remix, transform, and build upon the material
+- **Share**: copy and redistribute the material in any medium or format  
+- **Adapt**: remix, transform, and build upon the material
 
 **Under the following terms:**
 
-- **Attribution** — you must give appropriate credit to Linus Kang, provide a link to the license, and indicate if changes were made  
-- **NonCommercial** — you may not use the material for commercial purposes  
-- **No additional restrictions** — you may not apply legal terms or technological measures that legally restrict others from doing anything the license permits
+- **Attribution**: you must give appropriate credit to Linus Kang, provide a link to the license, and indicate if changes were made  
+- **NonCommercial**: you may not use the material for commercial purposes  
+- **No additional restrictions**: you may not apply legal terms or technological measures that legally restrict others from doing anything the license permits
