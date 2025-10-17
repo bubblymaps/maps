@@ -121,10 +121,10 @@ export function Home() {
               <span className="h-3 w-3 rounded-full bg-red-500"></span>
               <span className="h-3 w-3 rounded-full bg-yellow-500"></span>
               <span className="h-3 w-3 rounded-full bg-green-500"></span>
-              <span className="ml-2 text-sm text-muted-foreground">https://maps.bubbly.io</span>
+              <span className="ml-2 text-sm text-muted-foreground">https://bubblymaps.org</span>
             </div>
             <iframe
-              src="http://localhost:3400"
+              src="https://bubblymaps.org"
               className="w-full h-[800px] sm:h-[600px] md:h-[650px] border-none"
               title="Embedded Website"
             ></iframe>

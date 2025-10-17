@@ -21,7 +21,7 @@ export const authOptions: AuthOptions = {
     EmailProvider({
       async sendVerificationRequest({ identifier: email, url }) {
         await resend.emails.send({
-          from: "Bubbly Team <bubbly@mail.linus.id.au>",
+          from: "Bubbly Maps <hello@bubblymaps.org>",
           to: email,
           subject: "Your account sign-in link",
           html: `

@@ -22,7 +22,7 @@ export default function AdminPage() {
         const res = await fetch("/admin/stats")
         const data = await res.json()
         setStats(data)
-      } catch (err: any) {
+      } catch (err) {
         console.log(err)
       } finally {
         setLoadingStats(false)
