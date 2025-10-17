@@ -128,3 +128,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.maplibregl-popup-tip {
+    display: none !important; /* removes the little arrow */
+}.maplibregl-popup {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+.maplibregl-popup-content {
+    padding: 0 !important;
+    background: transparent !important;
+}
+.maplibregl-popup-close-button {
+    display: none !important;
+}

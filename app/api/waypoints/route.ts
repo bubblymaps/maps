@@ -28,7 +28,11 @@ export async function GET(req: Request) {
             select: { id: true, image: true, displayName: true, handle: true },
           },
           favorites: true,
-          reviews: true,
+          reviews: {
+            include: {
+              user: { select: { handle: true } }
+            }
+          }
         },
       }
     )

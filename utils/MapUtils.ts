@@ -1,17 +1,20 @@
-import maplibregl from "maplibre-gl";
-import type { FeatureCollection, Point } from "geojson";
-import type { Waypoint } from "@/types/types";
+import type React from "react"
+import maplibregl from "maplibre-gl"
+import type { FeatureCollection, Point } from "geojson"
+import type { Waypoint } from "@/types/types"
+import { createRoot } from "react-dom/client"
+import { BubblerPopup } from "@/components/Map/Popup"
 
 export function getMapStyle(themeValue: string) {
   if (themeValue === "dark") {
-    return "https://tiles.linus.id.au/styles/dark/style.json";
+    return "https://tiles.linus.id.au/styles/dark/style.json"
   }
 
-  return "https://tiles.linus.id.au/styles/light/style.json";
+  return "https://tiles.linus.id.au/styles/light/style.json"
 }
 
 export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
-  if (!map || waypoints.length === 0) return;
+  if (!map || waypoints.length === 0) return
 
   const geojson: FeatureCollection<Point, { id: number; name: string }> = {
     type: "FeatureCollection",
@@ -20,11 +23,11 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
       properties: { id: wp.id, name: wp.name },
       geometry: { type: "Point", coordinates: [wp.longitude, wp.latitude] },
     })),
-  };
+  }
 
   if (map.getSource("waypoints")) {
-    (map.getSource("waypoints") as maplibregl.GeoJSONSource).setData(geojson);
-    return;
+    ; (map.getSource("waypoints") as maplibregl.GeoJSONSource).setData(geojson)
+    return
   }
 
   map.addSource("waypoints", {
@@ -33,7 +36,7 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
     cluster: true,
     clusterMaxZoom: 14,
     clusterRadius: 50,
-  });
+  })
 
   map.addLayer({
     id: "clusters",
@@ -41,19 +44,12 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
     source: "waypoints",
     filter: ["has", "point_count"],
     paint: {
-      "circle-color": [
-        "step",
-        ["get", "point_count"],
-        "#60A5FA",
-        10, "#3B82F6",
-        50, "#2563EB",
-        100, "#1E3A8A",
-      ],
+      "circle-color": ["step", ["get", "point_count"], "#60A5FA", 10, "#3B82F6", 50, "#2563EB", 100, "#1E3A8A"],
       "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 50, 25],
       "circle-stroke-width": 2,
       "circle-stroke-color": "#ffffff",
     },
-  });
+  })
 
   map.addLayer({
     id: "cluster-count",
@@ -68,7 +64,7 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
     paint: {
       "text-color": "#ffffff",
     },
-  });
+  })
 
   map.addLayer({
     id: "unclustered-point",
@@ -81,34 +77,53 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
       "circle-stroke-width": 2,
       "circle-stroke-color": "#ffffff",
     },
-  });
+  })
 
   map.on("click", "unclustered-point", (e) => {
-    const feature = e.features?.[0];
-    if (!feature || !feature.properties) return;
-    const coords = (feature.geometry as Point).coordinates.slice() as [number, number];
-    new maplibregl.Popup()
+    const feature = e.features?.[0]
+    if (!feature || !feature.properties) return
+
+    const coords = (feature.geometry as Point).coordinates.slice() as [number, number]
+    const wp = waypoints.find((w) => w.id === feature.properties.id)
+    if (!wp) return
+
+    // Create a container div for the popup
+    const container = document.createElement("div")
+
+    // Render React component into the popup
+    const root = createRoot(container)
+    root.render(BubblerPopup({ wp }))
+
+    new maplibregl.Popup({
+      offset: 25,
+      closeButton: true,
+      maxWidth: "none",
+    })
       .setLngLat(coords)
-      .setHTML(`<strong>${feature.properties.name}</strong>`)
-      .addTo(map);
-  });
+      .setDOMContent(container)
+      .addTo(map)
+  })
 
   map.on("click", "clusters", async (e) => {
-    const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
-    if (!features.length) return;
-    const clusterFeature = features[0];
-    if (!clusterFeature.properties) return;
+    const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })
+    if (!features.length) return
+    const clusterFeature = features[0]
+    if (!clusterFeature.properties) return
 
-    const source = map.getSource("waypoints") as maplibregl.GeoJSONSource;
-    const clusterId = clusterFeature.properties.cluster_id as number;
-    const zoom = await source.getClusterExpansionZoom(clusterId);
-    const coords = (clusterFeature.geometry as Point).coordinates as [number, number];
-    map.easeTo({ center: coords, zoom });
-  });
+    const source = map.getSource("waypoints") as maplibregl.GeoJSONSource
+    const clusterId = clusterFeature.properties.cluster_id as number
+    const zoom = await source.getClusterExpansionZoom(clusterId)
+    const coords = (clusterFeature.geometry as Point).coordinates as [number, number]
+    map.easeTo({ center: coords, zoom })
+  })
 }
 
-export function loadMap(mapRef: React.MutableRefObject<maplibregl.Map | null>, mapContainerRef: React.RefObject<HTMLDivElement | null>, theme: string) {
-  if (!mapContainerRef) return;
+export function loadMap(
+  mapRef: React.MutableRefObject<maplibregl.Map | null>,
+  mapContainerRef: React.RefObject<HTMLDivElement | null>,
+  theme: string,
+) {
+  if (!mapContainerRef) return
 
   if (!mapRef.current && mapContainerRef.current) {
     mapRef.current = new maplibregl.Map({
@@ -117,40 +132,39 @@ export function loadMap(mapRef: React.MutableRefObject<maplibregl.Map | null>, m
       center: [0, 0],
       zoom: 1,
       attributionControl: false,
-    });
+    })
 
     mapRef.current.on("load", () => {
-      console.log("[ Bubbly Maps ] Map Loaded!");
+      console.log("[ Bubbly Maps ] Map Loaded!")
 
-      const params = new URLSearchParams(window.location.search);
-      const lat = parseFloat(params.get("lat") || "");
-      const lng = parseFloat(params.get("lng") || "");
-      const zoom = parseFloat(params.get("zoom") || "");
+      const params = new URLSearchParams(window.location.search)
+      const lat = Number.parseFloat(params.get("lat") || "")
+      const lng = Number.parseFloat(params.get("lng") || "")
+      const zoom = Number.parseFloat(params.get("zoom") || "")
 
       if (!isNaN(lat) && !isNaN(lng)) {
         mapRef.current!.flyTo({
           center: [lng, lat],
           zoom: !isNaN(zoom) ? zoom : 14,
           essential: true,
-        });
+        })
       }
-    });
-
-    mapRef.current.on("moveend", () => {
-      const center = mapRef.current!.getCenter();
-      const zoom = mapRef.current!.getZoom();
-      const params = new URLSearchParams(window.location.search);
-
-      params.set("lat", center.lat.toFixed(6));
-      params.set("lng", center.lng.toFixed(6));
-      params.set("zoom", zoom.toFixed(2));
-
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState({}, "", newUrl);
     })
 
+    mapRef.current.on("moveend", () => {
+      const center = mapRef.current!.getCenter()
+      const zoom = mapRef.current!.getZoom()
+      const params = new URLSearchParams(window.location.search)
+
+      params.set("lat", center.lat.toFixed(6))
+      params.set("lng", center.lng.toFixed(6))
+      params.set("zoom", zoom.toFixed(2))
+
+      const newUrl = `${window.location.pathname}?${params.toString()}`
+      window.history.replaceState({}, "", newUrl)
+    })
   } else if (mapRef.current) {
-    mapRef.current.setStyle(getMapStyle(theme));
+    mapRef.current.setStyle(getMapStyle(theme))
   }
 }
 
@@ -158,28 +172,28 @@ export function query(
   searchValue: string,
   waypoints: Waypoint[],
   map: maplibregl.Map | null,
-  onSelect?: (wp: Waypoint) => void
+  onSelect?: (wp: Waypoint) => void,
 ) {
-  if (!map || !searchValue) return [];
+  if (!map || !searchValue) return []
 
-  const lower = searchValue.toLowerCase();
-  const matches = waypoints.filter(wp => wp.name.toLowerCase().includes(lower));
+  const lower = searchValue.toLowerCase()
+  const matches = waypoints.filter((wp) => wp.name.toLowerCase().includes(lower))
 
-  if (matches.length === 0) return [];
+  if (matches.length === 0) return []
 
-  const first = matches[0];
+  const first = matches[0]
   map.flyTo({
     center: [first.longitude, first.latitude],
     zoom: 20,
     essential: true,
-  });
+  })
 
   new maplibregl.Popup()
     .setLngLat([first.longitude, first.latitude])
     .setHTML(`<strong>${first.name}</strong>`)
-    .addTo(map);
+    .addTo(map)
 
-  if (onSelect) onSelect(first);
+  if (onSelect) onSelect(first)
 
   return matches
 }

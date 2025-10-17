@@ -32,8 +32,8 @@ model User {
 model Bubbler {
   id            Int      @id @default(autoincrement())
   name          String
-  latitude      Float    @unique
-  longitude     Float    @unique
+  latitude      Float
+  longitude     Float
   description   String?
   addedByUserId String?
   addedBy       User?    @relation(fields: [addedByUserId], references: [id])
@@ -47,6 +47,8 @@ model Bubbler {
   region        String?
   favorites Favorite[]
   reviews   Review[]
+
+  @@unique([latitude, longitude])
 }
 
 model Favorite {
