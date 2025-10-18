@@ -118,7 +118,7 @@ export function Map() {
                         const root = createRoot(container)
                         root.render(<BubblerPopup wp={selected} />)
 
-                        const newPopup = new maplibregl.Popup({ offset: 25, closeButton: true, maxWidth: "none" })
+                        const newPopup = new maplibregl.Popup({ offset: 10, closeButton: true, maxWidth: "none" })
                             .setLngLat([selected.longitude, selected.latitude])
                             .setDOMContent(container)
                             .addTo(mapInstance)
@@ -157,7 +157,7 @@ export function Map() {
                                 const root = createRoot(container)
                                 root.render(<BubblerPopup wp={wp} />)
 
-                                const newPopup = new maplibregl.Popup({ offset: 25, closeButton: true, maxWidth: "none" })
+                                const newPopup = new maplibregl.Popup({ offset: 10, closeButton: true, maxWidth: "none" })
                                     .setLngLat([wp.longitude, wp.latitude])
                                     .setDOMContent(container)
                                     .addTo(mapInstance)

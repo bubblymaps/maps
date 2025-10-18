@@ -34,7 +34,7 @@ export function BubblerPopup({ wp }: BubblerPopupProps) {
                         alt={`Bubbler ${wp.name}`}
                         width={400}
                         height={150}
-                        className="object-cover w-full h-48 hover:scale-105 transition-transform duration-300"
+                        className="object-cover w-full h-48 hover:scale-105 transition-transform duration-300 rounded-t-xl"
                     />
                 </div>
             )}

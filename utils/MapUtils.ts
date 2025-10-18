@@ -95,7 +95,7 @@ export function addWaypoints(map: maplibregl.Map, waypoints: Waypoint[]) {
     root.render(BubblerPopup({ wp }))
 
     new maplibregl.Popup({
-      offset: 25,
+      offset: 10,
       closeButton: true,
       maxWidth: "none",
     })
@@ -188,11 +188,15 @@ export function query(
     essential: true,
   })
 
-  new maplibregl.Popup()
+  new maplibregl.Popup({
+      offset: 10,
+      closeButton: true,
+      maxWidth: "none",
+    })
     .setLngLat([first.longitude, first.latitude])
     .setHTML(`<strong>${first.name}</strong>`)
     .addTo(map)
-
+    
   if (onSelect) onSelect(first)
 
   return matches

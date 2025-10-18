@@ -131,8 +131,10 @@
 
 
 .maplibregl-popup-tip {
-    display: none !important; /* removes the little arrow */
-}.maplibregl-popup {
+    display: none !important;
+}
+
+.maplibregl-popup {
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
