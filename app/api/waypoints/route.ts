@@ -60,8 +60,9 @@ export async function POST(req: NextRequest) {
       ignoreLog = false,
     } = body;
 
-    const authHeader = req.headers.get("Authorization");
-    const apiTokenValid = authHeader === `Bearer ${env.BUBBLY_API_TOKEN}`;
+    const authHeader = req.headers.get("Authorization")?.trim();
+const apiTokenValid = authHeader === `Bearer ${env.BUBBLY_API_TOKEN}`;
+
     const userId = session?.user?.id ?? (apiTokenValid ? overrideUserId : null);
 
     if (!userId) {
