@@ -112,7 +112,7 @@ export function AvatarManager() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("/home")}
+                    onClick={() => router.push("https://bubblymaps.org/")}
                 >
                     <Home className="mr-2 h-4 w-4" />
                     Home
@@ -131,14 +131,14 @@ export function AvatarManager() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("/privacy")}
+                    onClick={() => router.push("https://bubblymaps.org/privacy")}
                 >
                     <FileText className="mr-2 h-4 w-4" />
                     Privacy Policy
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("/terms")}
+                    onClick={() => router.push("https://bubblymaps.org/terms")}
                 >
                     <FileText className="mr-2 h-4 w-4" />
                     Terms and Conditions
@@ -146,7 +146,7 @@ export function AvatarManager() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("https://github.com/linuskangsoftware/bubbly")}
+                    onClick={() => router.push("https://github.com/bubblymaps")}
                 >
                     <svg
                         viewBox="0 0 438.549 438.549"
@@ -162,14 +162,14 @@ export function AvatarManager() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("/docs")}
+                    onClick={() => router.push("https://docs.bubblymaps.org")}
                 >
                     <BookOpenText className="mr-2 h-4 w-4" />
                     Documentation
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("/support")}
+                    onClick={() => router.push("https://bubblymaps.org/support")}
                 >
                     <LifeBuoy className="mr-2 h-4 w-4" />
                     Support
