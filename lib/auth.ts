@@ -17,7 +17,7 @@ export const authOptions: AuthOptions = {
         params: { scope: "openid email profile" },
       },
     }),
-    
+
     EmailProvider({
       async sendVerificationRequest({ identifier: email, url }) {
         await resend.emails.send({
@@ -25,37 +25,37 @@ export const authOptions: AuthOptions = {
           to: email,
           subject: "Your account sign-in link",
           html: `
-            <div style="font-family: 'Segoe UI', Roboto, sans-serif; background: #000000; padding: 40px 0;">
-              <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 32px; border-radius: 0; box-shadow: none;">
+            <div style="font-family: 'Segoe UI', Roboto, sans-serif; background-color: #000; padding: 40px 0;">
+              <div style="max-width: 600px; margin: auto; background-color: #fff; padding: 40px 48px; border-radius: 0; border: 1px solid #e5e5e5;">
                 
-                <div style="text-align: center; margin-bottom: 24px;">
-                  <h1 style="margin: 0; font-size: 26px; color: #000000; font-weight: 400; letter-spacing: -0.5px;">
-                    Sign in to <span style="color: #000000; font-weight: 600;">Bubbly</span>
+                <div style="text-align: center; margin-bottom: 32px;">
+                  <h1 style="margin: 0; font-size: 28px; color: #000; font-weight: 500; letter-spacing: -0.5px;">
+                    Sign in to <span style="font-weight: 700;">Bubbly Maps</span>
                   </h1>
                 </div>
-            
-                <p style="font-size: 16px; line-height: 1.5; color: #666666; text-align: center; margin: 0 0 32px; font-weight: 400;">
-                  Welcome! Click the button below to securely sign in.
-                  <br/>
-                  <strong style="color: #000000;">This link expires in 10 minutes.</strong>
+
+                <p style="font-size: 15px; line-height: 1.6; color: #333; text-align: center; margin: 0 0 36px;">
+                  Click the button below to securely sign in.<br/>
+                  <strong style="color: #000;">This link expires in 10 minutes.</strong>
                 </p>
-            
-                <div style="text-align: center; margin-bottom: 32px;">
+
+                <div style="text-align: center; margin-bottom: 40px;">
                   <a href="${url}" 
-                    style="display: inline-block; background-color: #000000; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 0; font-weight: 500; font-size: 16px; border: 2px solid #000000; transition: all 0.2s; letter-spacing: 0.5px;">
-                    SIGN IN
+                    style="display: inline-block; background-color: #000; color: #fff; padding: 14px 36px; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px; border: 1px solid #000;">
+                    Sign in
                   </a>
                 </div>
 
-                <p style="font-size: 16px; line-height: 1.5; color: #666666; text-align: center; margin: 0 0 32px; font-weight: 400;">
-                  Any questions or concerns? Please reach out at <a href="mailto:email@linus.id.au" style="color: #000000; text-decoration: underline;">email@linus.id.au</a>.
+                <p style="font-size: 15px; line-height: 1.6; color: #333; text-align: center; margin: 0 0 36px;">
+                  Questions or issues? Contact 
+                  <a href="mailto:support@bubblymaps.org" style="color: #000; text-decoration: underline;">support@bubblymaps.org</a>.
                 </p>
-            
+
                 <hr style="margin: 0 0 32px; border: none; border-top: 1px solid #e5e5e5;" />
-           
-                <p style="font-size: 14px; color: #999999; line-height: 1.4; text-align: center; margin: 0; font-weight: 400;">
-                  Didn't request this email? You can safely ignore it.<br/>
-                  For security reasons, never share this link.
+
+                <p style="font-size: 13px; color: #777; line-height: 1.6; text-align: center; margin: 0;">
+                  Didn’t request this email? You can safely ignore it.<br/>
+                  Never share this link with anyone.
                 </p>
               </div>
             </div>
