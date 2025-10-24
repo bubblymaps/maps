@@ -45,7 +45,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                   ? user.displayName
                     .split(" ")
                     .filter(Boolean)
-                    .map((word) => word[0].toUpperCase())
+                    .map((word: string) => word[0].toUpperCase())
                     .slice(0, 2)
                     .join("")
                   : "U"}
