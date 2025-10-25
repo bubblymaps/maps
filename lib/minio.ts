@@ -1,6 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 
-export function getS3Client() {
+export function s3Client() {
   const { MINIO_URL, MINIO_USER, MINIO_PASSWORD, MINIO_BUCKET, MINIO_REGION } = process.env;
 
   if (!MINIO_URL || !MINIO_USER || !MINIO_PASSWORD || !MINIO_BUCKET) {

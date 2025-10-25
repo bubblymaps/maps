@@ -1,4 +1,4 @@
-import { s3, bucket } from "@/lib/minio"
+import { s3Client } from "@/lib/minio"
 import {
   PutObjectCommand,
   DeleteObjectCommand,
@@ -10,6 +10,7 @@ export async function uploadFile(
   file: Buffer | Uint8Array | Blob | string,
   mimeType: string
 ) {
+  const { s3, bucket } = s3Client()
   try {
     await s3.send(
       new PutObjectCommand({
@@ -30,6 +31,7 @@ export async function uploadFile(
 
 export async function deleteFile(key: string) {
   try {
+    const { s3, bucket } = s3Client()
     await s3.send(
       new DeleteObjectCommand({
         Bucket: bucket,
@@ -45,6 +47,7 @@ export async function deleteFile(key: string) {
 
 export async function getFileInfo(key: string) {
   try {
+    const { s3, bucket } = s3Client()
     const res = await s3.send(
       new HeadObjectCommand({
         Bucket: bucket,
@@ -59,6 +62,7 @@ export async function getFileInfo(key: string) {
 }
 
 export function getFileUrl(key: string) {
+  const { s3, bucket } = s3Client()
   const base = process.env.MINIO_URL!.replace(/\/$/, "")
   return `${base}/${bucket}/${key}`
 }
