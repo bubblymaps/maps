@@ -30,8 +30,6 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npx prisma generate
-ARG RESEND_API_KEY
-ENV RESEND_API_KEY=$RESEND_API_KEY
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \

@@ -3,9 +3,14 @@ import { AuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "@/lib/prisma"
+
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
+export function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) throw new Error("RESEND_API_KEY not set")
+  return new Resend(apiKey)
+}
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -20,6 +25,7 @@ export const authOptions: AuthOptions = {
 
     EmailProvider({
       async sendVerificationRequest({ identifier: email, url }) {
+        const resend = getResendClient()
         await resend.emails.send({
           from: "Bubbly Maps <hello@bubblymaps.org>",
           to: email,
