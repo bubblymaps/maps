@@ -1,6 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "./prisma"
 import { sendEmail } from "./modules/mail"
 
@@ -16,6 +16,21 @@ export const authOptions: AuthOptions = {
     strategy: "database",
   },
   secret: process.env.NEXTAUTH_SECRET,
+
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+        session.user.handle = user.handle;
+        session.user.email = user.email;
+        session.user.image = user.image;
+        session.user.displayName = user.displayName;
+        session.user.bio = user.bio;
+        session.user.moderator = user.moderator
+      }
+      return session;
+    },
+  },
 
   events: {
     createUser: async ({ user }) => {

@@ -144,4 +144,22 @@ export class Users {
       throw new Error(err.message || "There was an issue fetching this user");
     }
   }
+
+  static async getUserByUsername(handle: string) { // legacy function for profiles
+    return prisma.user.findUnique({
+      where: { handle },
+      select: {
+        id: true,
+        displayName: true,
+        handle: true,
+        bio: true,
+        image: true,
+        verified: true,
+        moderator: true,
+        xp: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 }

@@ -121,8 +121,8 @@
   }
 }
 
-html, body, #__next {
+/* html, body, #__next {
   height: 100%;
   width: 100%;
   overflow: hidden;
-}
+} */

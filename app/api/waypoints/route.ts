@@ -2,13 +2,35 @@ import { NextResponse } from "next/server";
 import { Waypoints, WaypointData } from "@/lib/modules/waypoints";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+// /api/waypoints → all waypoints (ordered by createdAt DESC)
+// /api/waypoints?userId=linuskang → all waypoints by specific user
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const userId = searchParams.get("userId")
+
   try {
-    const waypoints = await Waypoints.all();
-    return NextResponse.json(waypoints);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const waypoints = await prisma.bubbler.findMany(
+      {
+        where: userId ? { addedByUserId: userId } : undefined,
+        orderBy: { createdAt: "desc" },
+        include: {
+          addedBy: {
+            select: { id: true, image: true, displayName: true, handle: true },
+          },
+          reviews: {
+            include: {
+              user: { select: { handle: true } }
+            }
+          }
+        },
+      }
+    )
+    return NextResponse.json(waypoints)
+  } catch (error) {
+    console.error("[WAYPOINTS_GET]", error)
+    return NextResponse.json({ error: "Failed to fetch waypoints" }, { status: 500 })
   }
 }
 
