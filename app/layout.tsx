@@ -3,6 +3,7 @@ import { GeistSans, GeistMono } from "geist/font";
 import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Bubbly Maps",
@@ -17,6 +18,10 @@ export default function RootLayout({
       <body className="antialiased">
         <Providers>{children}</Providers>
         <Toaster position="top-right" richColors />
+        <Script
+          src="https://bubblymaps.statuspage.io/embed/script.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

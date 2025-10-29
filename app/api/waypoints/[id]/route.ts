@@ -3,9 +3,12 @@ import { Waypoints, WaypointUpdateData } from "@/lib/modules/waypoints";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id: idStr } = await context.params;
   try {
-    const id = parseInt(context.params.id, 10);
+    const id = parseInt(idStr, 10);
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
     const waypoint = await Waypoints.byId(id);
@@ -17,9 +20,10 @@ export async function GET(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id: idStr } = await context.params;
   try {
-    const id = parseInt(context.params.id, 10);
+    const id = parseInt(idStr, 10);
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
     const session = await getServerSession(authOptions);
@@ -51,9 +55,10 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id: idStr } = await context.params;
   try {
-    const id = parseInt(context.params.id, 10);
+    const id = parseInt(idStr, 10);
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
     const apiToken = req.headers.get("authorization")?.replace("Bearer ", "");

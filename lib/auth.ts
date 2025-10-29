@@ -27,6 +27,7 @@ export const authOptions: AuthOptions = {
         session.user.displayName = user.displayName;
         session.user.bio = user.bio;
         session.user.moderator = user.moderator
+        session.user.name = user.name;
       }
       return session;
     },

@@ -74,9 +74,17 @@ export default function Page() {
   useEffect(() => {
     if (!map) return;
 
-    fetch("/api/waypoints")
-      .then((res) => res.json())
-      .then((data: Waypoint[]) => {
+    const loadWaypoints = async () => {
+      console.log("Loading waypoints...");
+      try {
+        const res = await fetch("/api/waypoints");
+        if (!res.ok) {
+          const errMsg = await res.text();
+          throw new Error(errMsg || `Server error: ${res.status}`);
+        }
+
+        const data: Waypoint[] = await res.json();
+
         const geojson = {
           type: "FeatureCollection",
           features: data.map((wp) => ({
@@ -91,104 +99,121 @@ export default function Page() {
           })),
         } as GeoJSON.FeatureCollection;
 
-        if (map.getLayer("clusters")) map.removeLayer("clusters");
-        if (map.getLayer("cluster-count")) map.removeLayer("cluster-count");
-        if (map.getLayer("unclustered-point")) map.removeLayer("unclustered-point");
+        // remove old layers and sources safely
+        ["clusters", "cluster-count", "unclustered-point"].forEach((layer) => {
+          if (map.getLayer(layer)) map.removeLayer(layer);
+        });
         if (map.getSource("waypoints")) map.removeSource("waypoints");
 
-        if (!map.getSource("waypoints")) {
-          map.addSource("waypoints", {
-            type: "geojson",
-            data: geojson,
-            cluster: true,
-            clusterMaxZoom: 14,
-            clusterRadius: 50,
-          });
+        // now add the new source and layers
+        map.addSource("waypoints", {
+          type: "geojson",
+          data: geojson,
+          cluster: true,
+          clusterMaxZoom: 14,
+          clusterRadius: 50,
+        });
 
-          map.addLayer({
-            id: "clusters",
-            type: "circle",
-            source: "waypoints",
-            filter: ["has", "point_count"],
-            paint: {
-              "circle-color": [
-                "step",
-                ["get", "point_count"],
-                "#4A90E2",
-                10,
-                "#357ABD",
-                50,
-                "#1F4C8B"
-              ],
-              "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 50, 30],
-              "circle-stroke-width": 2,
-              "circle-stroke-color": "#ffffff",
-            },
-          });
+        map.addLayer({
+          id: "clusters",
+          type: "circle",
+          source: "waypoints",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "#4A90E2",
+              10,
+              "#357ABD",
+              50,
+              "#1F4C8B",
+            ],
+            "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 50, 30],
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff",
+          },
+        });
 
-          map.addLayer({
-            id: "cluster-count",
-            type: "symbol",
-            source: "waypoints",
-            filter: ["has", "point_count"],
-            layout: {
-              "text-field": "{point_count_abbreviated}",
-              "text-font": ["Arial Unicode MS Bold"],
-              "text-size": 12,
-            },
-            paint: {
-              "text-color": "#ffffff",
-            },
-          });
+        map.addLayer({
+          id: "cluster-count",
+          type: "symbol",
+          source: "waypoints",
+          filter: ["has", "point_count"],
+          layout: {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["Arial Unicode MS Bold"],
+            "text-size": 12,
+          },
+          paint: {
+            "text-color": "#ffffff",
+          },
+        });
 
-          map.addLayer({
-            id: "unclustered-point",
-            type: "circle",
-            source: "waypoints",
-            filter: ["!", ["has", "point_count"]],
-            paint: {
-              "circle-color": "#1E90FF",
-              "circle-radius": 8,
-              "circle-stroke-width": 2,
-              "circle-stroke-color": "#ffffff",
-            },
-          });
+        map.addLayer({
+          id: "unclustered-point",
+          type: "circle",
+          source: "waypoints",
+          filter: ["!", ["has", "point_count"]],
+          paint: {
+            "circle-color": "#1E90FF",
+            "circle-radius": 8,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff",
+          },
+        });
 
-          map.on("click", "clusters", (e) => {
-            const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
-            const clusterId = features[0].properties!.cluster_id;
-            const source = map.getSource("waypoints") as any as maplibregl.GeoJSONSource;
+        // cluster click
+        map.on("click", "clusters", (e) => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
+          const clusterId = features[0].properties!.cluster_id;
+          const source = map.getSource("waypoints") as any as maplibregl.GeoJSONSource;
 
-            const maybePromise = (source as any).getClusterExpansionZoom(clusterId as number);
+          const maybePromise = (source as any).getClusterExpansionZoom(clusterId as number);
+          if (maybePromise && typeof maybePromise.then === "function") {
+            maybePromise
+              .then((zoom: number) => {
+                map.easeTo({
+                  center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
+                  zoom,
+                });
+              })
+              .catch(() => { });
+          } else {
+            const zoom = maybePromise as number;
+            map.easeTo({
+              center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
+              zoom,
+            });
+          }
+        });
 
-            if (maybePromise && typeof maybePromise.then === "function") {
-              maybePromise
-                .then((zoom: number) => {
-                  map.easeTo({
-                    center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
-                    zoom,
-                  });
-                })
-                .catch(() => { });
-            } else {
-              const zoom = maybePromise as number;
-              map.easeTo({
-                center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
-                zoom,
-              });
-            }
-          });
+        // point click
+        map.on("click", "unclustered-point", (e) => {
+          const feature = e.features![0];
+          new maplibregl.Popup()
+            .setLngLat((feature.geometry as any).coordinates)
+            .setHTML(`<strong>${feature.properties!.name}</strong>`)
+            .addTo(map);
+        });
+      } catch (err: any) {
+        console.error(err);
+        toast.error(
+          `There was an issue whilst loading waypoints. Please try again later! (${err.message})`
+        );
+      }
 
-          map.on("click", "unclustered-point", (e) => {
-            const feature = e.features![0];
-            new maplibregl.Popup()
-              .setLngLat((feature.geometry as any).coordinates)
-              .setHTML(`<strong>${feature.properties!.name}</strong>`)
-              .addTo(map);
-          });
-        }
-      });
+      console.log("Waypoints loaded.");
+    };
+
+    const handleLoad = () => loadWaypoints();
+    map.on("style.load", handleLoad);
+
+    return () => {
+      map.off("style.load", handleLoad);
+    };
   }, [map, styleURL]);
+
 
   return (
     <div className="w-screen h-screen relative overflow-hidden">

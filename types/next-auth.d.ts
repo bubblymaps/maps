@@ -10,7 +10,7 @@ declare module "next-auth" {
       id: string
       bio: string | null
       moderator: boolean
-      
+      name: string | null
     }
   }
 
@@ -23,6 +23,6 @@ declare module "next-auth" {
     image?: string | null
     moderator: boolean
 
-
+    name: string | null
   }
 }
