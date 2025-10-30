@@ -15,6 +15,9 @@ import { useSession } from "next-auth/react"
 import MapBox from "@/components/Map/map"
 import Login from "@/components/login"
 
+import ReactDOM from "react-dom/client"
+import { WaypointPopup } from "@/components/Map/popup"
+
 import { ThemeToggle } from "@/components/themeToggle"
 import { LoginBtn } from "@/components/loginBtn"
 import { Watermark } from "@/components/Map/watermark"
@@ -31,6 +34,9 @@ interface Waypoint {
   longitude: number
   verified: boolean
   approved: boolean
+  amenities: string[] // or the correct type if different
+  createdAt: string   // or Date, depending on your backend
+  updatedAt: string   // or Date, depending on your backend
 }
 
 export default function Page() {
@@ -160,10 +166,7 @@ export default function Page() {
         });
 
         map.on("click", "unclustered-point", (e) => {
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: ["unclustered-point"],
-          })
-
+          const features = map.queryRenderedFeatures(e.point, { layers: ["unclustered-point"] })
           if (!features.length) return
 
           const coordinates = (features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number]
@@ -173,34 +176,13 @@ export default function Page() {
             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360
           }
 
-          const popupContent = `
-            <div style="padding: 8px; min-width: 200px;">
-              <h3 style="margin: 0 0 8px 0; font-weight: 600; font-size: 16px;">${properties.name}</h3>
-              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 14px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="color: #666;">ID:</span>
-                  <span style="font-weight: 500;">${properties.id}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="color: #666;">Verified:</span>
-                  <span style="color: ${properties.verified ? "#22c55e" : "#ef4444"}; font-weight: 500;">
-                    ${properties.verified ? "✓ Yes" : "✗ No"}
-                  </span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="color: #666;">Approved:</span>
-                  <span style="color: ${properties.approved ? "#22c55e" : "#ef4444"}; font-weight: 500;">
-                    ${properties.approved ? "✓ Yes" : "✗ No"}
-                  </span>
-                </div>
-                <div style="margin-top: 4px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666;">
-                  <div>${properties.latitude.toFixed(5)}, ${properties.longitude.toFixed(5)}</div>
-                </div>
-              </div>
-            </div>
-          `
+          const popupNode = document.createElement("div")
+          ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={properties} />)
 
-          new maplibregl.Popup().setLngLat(coordinates).setHTML(popupContent).addTo(map)
+          new maplibregl.Popup({
+            offset: 10,
+            closeOnClick: true
+          }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map)
         })
 
         map.on("mouseenter", "clusters", () => {

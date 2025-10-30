@@ -126,3 +126,23 @@
   width: 100%;
   overflow: hidden;
 } */
+
+.maplibregl-popup {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.maplibregl-popup-close-button {
+  display: none !important;
+}
+
+.maplibregl-popup-tip {
+  display: none !important; /* hide the arrow */
+}
