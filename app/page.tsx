@@ -35,8 +35,8 @@ interface Waypoint {
   verified: boolean
   approved: boolean
   amenities: string[] // or the correct type if different
-  createdAt: string   // or Date, depending on your backend
-  updatedAt: string   // or Date, depending on your backend
+  createdAt: string // or Date, depending on your backend
+  updatedAt: string // or Date, depending on your backend
 }
 
 export default function Page() {
@@ -46,12 +46,14 @@ export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [waypoints, setWaypoints] = useState<Waypoint[]>([])
+  const [currentPopup, setCurrentPopup] = useState<maplibregl.Popup | null>(null)
 
   const { data: session, status } = useSession()
 
   const latParam = Number.parseFloat(searchParams.get("lat") || "0")
   const lngParam = Number.parseFloat(searchParams.get("lng") || "0")
   const zoomParam = Number.parseFloat(searchParams.get("zoom") || "0")
+  const idParam = searchParams.get("id")
 
   const initialCenter: [number, number] = latParam && lngParam ? [lngParam, latParam] : [-7, 0]
   const initialZoom: number = zoomParam || 1
@@ -96,9 +98,9 @@ export default function Page() {
             properties: wp,
           })),
         }
-          ;["clusters", "cluster-count", "unclustered-point"].forEach((id) => {
-            if (map.getLayer(id)) map.removeLayer(id)
-          })
+        ;["clusters", "cluster-count", "unclustered-point"].forEach((id) => {
+          if (map.getLayer(id)) map.removeLayer(id)
+        })
         if (map.getSource("waypoints")) map.removeSource("waypoints")
 
         map.addSource("waypoints", {
@@ -148,22 +150,23 @@ export default function Page() {
           },
         })
 
-        const source = map.getSource("waypoints") as maplibregl.GeoJSONSource;
+        const source = map.getSource("waypoints") as maplibregl.GeoJSONSource
 
         map.on("click", "clusters", (e) => {
-          const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
-          const clusterId = features[0].properties.cluster_id;
+          const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })
+          const clusterId = features[0].properties.cluster_id
 
-          source.getClusterExpansionZoom(clusterId)
+          source
+            .getClusterExpansionZoom(clusterId)
             .then((zoom: number) => {
               map.easeTo({
                 center: (features[0].geometry as any).coordinates as [number, number],
                 zoom,
                 duration: 500,
-              });
+              })
             })
-            .catch((err: Error) => console.error(err));
-        });
+            .catch((err: Error) => console.error(err))
+        })
 
         map.on("click", "unclustered-point", (e) => {
           const features = map.queryRenderedFeatures(e.point, { layers: ["unclustered-point"] })
@@ -176,13 +179,35 @@ export default function Page() {
             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360
           }
 
+          if (currentPopup) {
+            currentPopup.remove()
+            setCurrentPopup(null)
+          }
+
+          const params = new URLSearchParams(window.location.search)
+          params.set("id", String(properties.id))
+          router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+
           const popupNode = document.createElement("div")
           ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={properties} />)
 
-          new maplibregl.Popup({
+          const popup = new maplibregl.Popup({
             offset: 10,
-            closeOnClick: true
-          }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map)
+            closeOnClick: true,
+          })
+            .setLngLat(coordinates)
+            .setDOMContent(popupNode)
+            .addTo(map)
+
+          setCurrentPopup(popup)
+
+          // Attach handler for this popup so ID is removed when it closes
+          popup.on("close", () => {
+            const params = new URLSearchParams(window.location.search)
+            params.delete("id")
+            router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+            setCurrentPopup(null)
+          })
         })
 
         map.on("mouseenter", "clusters", () => {
@@ -202,6 +227,38 @@ export default function Page() {
         })
 
         console.log("Waypoints loaded.")
+
+        if (idParam) {
+          const target = data.find((wp) => String(wp.id) === idParam)
+          if (target) {
+            const coordinates: [number, number] = [target.longitude, target.latitude]
+
+            const popupNode = document.createElement("div")
+            ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={target} />)
+
+            const popup = new maplibregl.Popup({
+              offset: 10,
+              closeOnClick: true,
+            })
+              .setLngLat(coordinates)
+              .setDOMContent(popupNode)
+              .addTo(map)
+
+            setCurrentPopup(popup)
+
+            popup.on("close", () => {
+              const params = new URLSearchParams(window.location.search)
+              params.delete("id")
+              router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+              setCurrentPopup(null)
+            })
+
+            map.jumpTo({
+              center: coordinates,
+              zoom: 17,
+            })
+          }
+        }
       } catch (err: any) {
         console.error(err)
         toast.error(`Failed to load waypoints: ${err.message}`)
