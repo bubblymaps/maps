@@ -26,6 +26,21 @@ export class Reviews {
     }
   }
 
+  static async all() {
+    try {
+      const reviews = await prisma.review.findMany({
+        include: {
+          user: { select: { id: true, displayName: true, handle: true, moderator: true, verified: true, image: true } },
+          bubbler: { select: { id: true, name: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return reviews;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching reviews");
+    }
+  }
+
   static async delete(id: number) {
     try {
       const deletedReview = await prisma.review.delete({
@@ -42,7 +57,7 @@ export class Reviews {
       const reviews = await prisma.review.findMany({
         where: { bubblerId },
         include: {
-          user: { select: { id: true, name: true } },
+          user: { select: { id: true, displayName: true, handle: true, moderator: true, verified: true, image: true } },
         },
         orderBy: { createdAt: "desc" },
       });
@@ -64,6 +79,17 @@ export class Reviews {
       return reviews;
     } catch (err: any) {
       throw new Error(err.message || "There was an issue fetching user reviews");
+    }
+  }
+
+  static async getId(id: number) {
+    try {
+      const review = await prisma.review.findUnique({
+        where: { id },
+      });
+      return review;
+    } catch (err: any) {
+      throw new Error(err.message || "Failed to fetch review");
     }
   }
 }

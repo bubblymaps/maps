@@ -11,7 +11,9 @@ import { Admin } from "@/components/Badges/admin"
 
 import { Users } from "@/lib/modules/users"
 
-interface ProfilePageParams {   
+import Link from "next/link"
+
+interface ProfilePageParams {
   params: Promise<{ handle: string }>
 }
 
@@ -51,12 +53,23 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-3xl font-bold text-balance">{user.displayName || user.handle}</h1>
 
-                {user.verified && (
-                  <Verified/>
-                )}
-
                 {user.moderator && (
-                  <Admin/>
+                  <Admin />
+                )}
+                {user.verified && (
+                  <Verified
+                    content={
+                      <p className="text-zinc-700 dark:text-zinc-300">
+                        Official account of a government, organization, or recognized entity.{" "}
+                        <Link
+                          href="/help/verified"
+                          className="font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2"
+                        >
+                          Learn more.
+                        </Link>
+                      </p>
+                    }
+                  />
                 )}
               </div>
 
@@ -71,7 +84,22 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
             {user.bio && (
               <div className="p-4 rounded-lg bg-card border shadow-sm mb-6">
                 <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Bio</h2>
-                <p className="text-foreground leading-relaxed whitespace-pre-line">{user.bio}</p>
+                <p className="text-foreground leading-relaxed whitespace-pre-line">
+                  {user.bio.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                    /^https?:\/\//.test(part) ? (
+                      <Link
+                        key={i}
+                        href={part}
+                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2"
+                        target="_blank"
+                      >
+                        {part}
+                      </Link>
+                    ) : (
+                      part
+                    )
+                  )}
+                </p>
               </div>
             )}
 
@@ -90,8 +118,8 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                 >
                   <ZapIcon
                     className={`h-5 w-5 ${isMVP
-                        ? "text-yellow-100 fill-yellow-100 drop-shadow-[0_0_8px_rgba(255,255,100,0.8)]"
-                        : "text-yellow-600 dark:text-yellow-500 fill-yellow-600 dark:fill-yellow-500"
+                      ? "text-yellow-100 fill-yellow-100 drop-shadow-[0_0_8px_rgba(255,255,100,0.8)]"
+                      : "text-yellow-600 dark:text-yellow-500 fill-yellow-600 dark:fill-yellow-500"
                       }`}
                   />
                 </div>
@@ -122,7 +150,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
           </div>
         </div>
         <UserContributions userId={user.id} />
-        <UserReviews userId={user.id} />
+        {/* <UserReviews userId={user.id} /> */}
       </div>
     </div>
   )
