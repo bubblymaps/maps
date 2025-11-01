@@ -18,6 +18,8 @@ import {
     AvatarFallback,
     AvatarImage
 } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 import {
     DropdownMenu,
@@ -38,20 +40,32 @@ export function AvatarManager() {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="cursor-pointer">
-                <Avatar>
-                    <AvatarImage src={session?.user?.image ?? undefined} />
-                    <AvatarFallback>
-                        {session?.user?.displayName?.trim()
-                            ? session?.user?.displayName
-                                .split(" ")
-                                .filter(Boolean)
-                                .map((word: string) => word[0].toUpperCase())
-                                .slice(0, 2)
-                                .join("")
-                            : "U"}
-                    </AvatarFallback>
-                </Avatar>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                        "cursor-pointer rounded-full border border-input shadow-md transition",
+                        "bg-white text-black",
+                        "dark:bg-zinc-900/80 dark:backdrop-blur-sm dark:text-white",
+                        "hover:bg-gray-100 dark:hover:bg-zinc-800",
+                        "h-10 w-10 rounded-full p-0 flex items-center justify-center"
+                    )}
+                >
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={session?.user?.image ?? undefined} />
+                        <AvatarFallback>
+                            {session?.user?.displayName?.trim()
+                                ? session?.user?.displayName
+                                    .split(" ")
+                                    .filter(Boolean)
+                                    .map((word: string) => word[0].toUpperCase())
+                                    .slice(0, 2)
+                                    .join("")
+                                : "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuLabel className="cursor-default">

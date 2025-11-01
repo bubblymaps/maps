@@ -188,8 +188,41 @@ export class Waypoints {
     }
 
     static async byId(id: number) {
-        return prisma.bubbler.findUnique({ where: { id } });
+        return prisma.bubbler.findUnique({
+            where: { id },
+            include: {
+                addedBy: {
+                    select: {
+                        id: true,
+                        handle: true,
+                        displayName: true,
+                        image: true,
+                        verified: true,
+                        moderator: true,
+                    },
+                },
+                reviews: {
+                    select: {
+                        id: true,
+                        rating: true,
+                        comment: true,
+                        createdAt: true,
+                        user: {
+                            select: {
+                                id: true,
+                                handle: true,
+                                displayName: true,
+                                image: true,
+                                verified: true,
+                                moderator: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
     }
+
 
     static async byUser(userId: string) {
         return prisma.bubbler.findMany({ where: { addedByUserId: userId } });

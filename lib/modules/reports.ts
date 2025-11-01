@@ -41,4 +41,58 @@ export class ReportAbuse {
       throw new Error(err.message || "There was an issue fetching abuse reports");
     }
   }
+
+  static async byId(id: number) {
+    try {
+      return await prisma.reportAbuse.findUnique({
+        where: { id },
+      });
+    }
+    catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching the abuse report");
+    }
+  }
+
+  static async byTarget(targetId: string) {
+    try {
+      return await prisma.reportAbuse.findMany({
+        where: { targetId },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching abuse reports");
+    }
+  }
+
+  static async all() {
+    try {
+      return await prisma.reportAbuse.findMany({
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching abuse reports");
+    }
+  }
+
+  static async delete(id: number) {
+    try {
+      const deletedReport = await prisma.reportAbuse.delete({
+        where: { id },
+      });
+      return deletedReport;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue deleting the abuse report");
+    }
+  }
+
+  static async resolved() {
+    try {
+      return await prisma.reportAbuse.findMany({
+        where: { resolved: true },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching abuse reports");
+    }
+  }
 }

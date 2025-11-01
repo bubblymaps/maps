@@ -11,6 +11,8 @@ import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import Loading from "@/components/loading"
 import { useRouter } from "next/navigation"
+import Header from "@/components/header"
+import Head from "next/head"
 
 export default function Page() {
     const { data: session, status, update } = useSession()
@@ -95,6 +97,7 @@ export default function Page() {
 
     return (
         <div className="min-h-screen bg-background">
+            <Header />
             <div className="mx-auto max-w-xl px-4 py-8 sm:px-6 lg:px-8">
                 <section className="space-y-6">
                     <input

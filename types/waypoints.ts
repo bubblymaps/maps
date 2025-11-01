@@ -10,6 +10,8 @@ export interface Waypoint {
     name?: string
     email?: string
     handle?: string
+    verified?: boolean
+    moderator?: boolean
   }
   amenities: string[]
   verified: boolean

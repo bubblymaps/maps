@@ -18,7 +18,6 @@ export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
   const [reviews, setReviews] = useState<{ rating: number }[]>([])
   const [avgRating, setAvgRating] = useState(0)
 
-  // Fetch reviews for this bubbler
   useEffect(() => {
     async function fetchReviews() {
       try {
@@ -171,7 +170,7 @@ export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
 
         <div className="pt-3">
           <Button asChild variant="outline" className="w-full text-sm font-medium">
-            <Link href={`/bubbler/${waypoint.id}`}>View More</Link>
+            <Link href={`/waypoint/${waypoint.id}`}>View More</Link>
           </Button>
         </div>
       </CardContent>
