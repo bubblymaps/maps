@@ -6,12 +6,49 @@ import Link from "next/link"
 import Image from "next/image"
 import { Verified } from "@/components/Badges/verified"
 import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
+import { Star, StarHalf } from "lucide-react"
+import { toast } from "sonner"
 
 interface Props {
   waypoint: Waypoint
 }
 
 export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
+  const [reviews, setReviews] = useState<{ rating: number }[]>([])
+  const [avgRating, setAvgRating] = useState(0)
+
+  // Fetch reviews for this bubbler
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`/api/reviews?bubblerId=${waypoint.id}`)
+        const data = await res.json()
+        const bubblerReviews = data.reviews || []
+
+        setReviews(bubblerReviews)
+
+        if (bubblerReviews.length > 0) {
+          const sum = bubblerReviews.reduce(
+            (acc: number, r: { rating: number | string }) => acc + Number(r.rating), // <-- Convert to number
+            0
+          )
+          setAvgRating(sum / bubblerReviews.length)
+
+          console.log(sum)
+        } else {
+          setAvgRating(0)
+        }
+      } catch (err) {
+        console.error(err)
+        toast.error("There was an error getting reviews for this waypoint. Please try again later.")
+        setAvgRating(0)
+      }
+    }
+    fetchReviews()
+  }, [waypoint.id])
+
+
   const parsedAddedBy = typeof waypoint.addedBy === "string" ? JSON.parse(waypoint.addedBy) : waypoint.addedBy
   const amenities: string[] = Array.isArray(waypoint.amenities)
     ? waypoint.amenities
@@ -19,7 +56,15 @@ export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
       ? JSON.parse(waypoint.amenities)
       : []
 
-  console.log(waypoint.amenities)
+  const renderStars = (rating: number) => {
+    const stars = []
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) stars.push(<Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />)
+      else if (rating >= i - 0.5) stars.push(<StarHalf key={i} className="h-4 w-4 text-yellow-500" />)
+      else stars.push(<Star key={i} className="h-4 w-4 text-yellow-500" />) // empty star
+    }
+    return stars
+  }
 
   return (
     <Card className="min-w-[280px] max-w-[500px] shadow-xl border-border/60 p-0 overflow-hidden backdrop-blur-sm bg-card/95 gap-0">
@@ -62,6 +107,13 @@ export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
             />
           )}
         </CardTitle>
+
+        {reviews.length > 0 && (
+          <div className="flex items-center gap-2 mt-1">
+            {renderStars(avgRating)}
+            <span className="text-sm font-medium text-foreground/80">({reviews.length})</span>
+          </div>
+        )}
 
         {waypoint.description && (
           <div className="mt-3 border border-border/60 bg-muted/30 rounded-lg p-3">

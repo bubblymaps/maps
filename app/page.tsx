@@ -98,9 +98,9 @@ export default function Page() {
             properties: wp,
           })),
         }
-        ;["clusters", "cluster-count", "unclustered-point"].forEach((id) => {
-          if (map.getLayer(id)) map.removeLayer(id)
-        })
+          ;["clusters", "cluster-count", "unclustered-point"].forEach((id) => {
+            if (map.getLayer(id)) map.removeLayer(id)
+          })
         if (map.getSource("waypoints")) map.removeSource("waypoints")
 
         map.addSource("waypoints", {
@@ -179,15 +179,6 @@ export default function Page() {
             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360
           }
 
-          if (currentPopup) {
-            currentPopup.remove()
-            setCurrentPopup(null)
-          }
-
-          const params = new URLSearchParams(window.location.search)
-          params.set("id", String(properties.id))
-          router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
-
           const popupNode = document.createElement("div")
           ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={properties} />)
 
@@ -199,15 +190,14 @@ export default function Page() {
             .setDOMContent(popupNode)
             .addTo(map)
 
-          setCurrentPopup(popup)
-
-          // Attach handler for this popup so ID is removed when it closes
-          popup.on("close", () => {
-            const params = new URLSearchParams(window.location.search)
-            params.delete("id")
-            router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+          const handleClose = () => {
             setCurrentPopup(null)
-          })
+          }
+
+          popup.on("close", handleClose)
+            ; (popup as any)._closeHandler = handleClose
+
+          setCurrentPopup(popup)
         })
 
         map.on("mouseenter", "clusters", () => {
@@ -228,37 +218,6 @@ export default function Page() {
 
         console.log("Waypoints loaded.")
 
-        if (idParam) {
-          const target = data.find((wp) => String(wp.id) === idParam)
-          if (target) {
-            const coordinates: [number, number] = [target.longitude, target.latitude]
-
-            const popupNode = document.createElement("div")
-            ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={target} />)
-
-            const popup = new maplibregl.Popup({
-              offset: 10,
-              closeOnClick: true,
-            })
-              .setLngLat(coordinates)
-              .setDOMContent(popupNode)
-              .addTo(map)
-
-            setCurrentPopup(popup)
-
-            popup.on("close", () => {
-              const params = new URLSearchParams(window.location.search)
-              params.delete("id")
-              router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
-              setCurrentPopup(null)
-            })
-
-            map.jumpTo({
-              center: coordinates,
-              zoom: 17,
-            })
-          }
-        }
       } catch (err: any) {
         console.error(err)
         toast.error(`Failed to load waypoints: ${err.message}`)
@@ -308,11 +267,13 @@ export default function Page() {
 
       {showLogin && (
         <>
+          {/* Overlay */}
           <div
             className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-fadeIn transition-opacity"
             onClick={() => setShowLogin(false)}
           />
-          <Login />
+          {/* Login modal */}
+          <Login onClose={() => setShowLogin(false)} />
         </>
       )}
     </div>
