@@ -70,7 +70,7 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-72">
                   <SheetTitle className="flex items-center gap-2 mb-4">
-                    <Droplet className="h-5 w-5 text-primary" />
+                    <Droplet className="h-5 w-5 text-primary fill-current" />
                     <span className="font-bold">bubblymaps</span>
                   </SheetTitle>
                   <NavLinks mobile />
@@ -80,7 +80,7 @@ export default function Header() {
 
             <Link href="/" className="flex items-center gap-2">
               <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Droplet className="h-5 w-5" />
+                <Droplet className="h-5 w-5 fill-current" />
               </div>
               <span className="hidden sm:inline text-base font-bold tracking-tight">bubblymaps</span>
             </Link>
