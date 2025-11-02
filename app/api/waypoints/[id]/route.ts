@@ -12,9 +12,10 @@ export async function GET(req: Request,
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
     const waypoint = await Waypoints.byId(id);
+    const waypointLogs = await Waypoints.fetchLogs(id);
     if (!waypoint) return NextResponse.json({ error: "Waypoint not found" }, { status: 404 });
 
-    return NextResponse.json(waypoint);
+    return NextResponse.json({ waypoint, logs: waypointLogs });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
@@ -48,7 +49,10 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       if (key in data) filteredData[key as keyof WaypointUpdateData] = data[key as keyof WaypointUpdateData] as any;
     }
 
-    const updatedWaypoint = await Waypoints.edit(id, filteredData as WaypointUpdateData);
+    // Get the userId from session, or use 'api' if authenticated via API token
+    const userId = session?.user?.id || (hasApiToken ? 'api' : null);
+    const updatedWaypoint = await Waypoints.edit(id, filteredData as WaypointUpdateData, userId);
+    
     return NextResponse.json(updatedWaypoint);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });

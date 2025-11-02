@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     const apiToken = req.headers.get("authorization")?.replace("Bearer ", "");
-    const hasApiToken = apiToken && apiToken === process.env.API_TOKEN;
+    const hasApiToken = apiToken && apiToken === process.env.API_KEY;
 
     if (!session && !hasApiToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     ];
 
     if (hasApiToken) {
-      allowedFields.push("approved", "verified");
+      allowedFields.push("approved", "verified", "addedByUserId");
     }
 
     const filteredData: any = {};
@@ -69,8 +69,9 @@ export async function POST(req: Request) {
     if (session?.user?.id) {
       filteredData.addedByUserId = session.user.id;
     } else if (hasApiToken) {
-      filteredData.addedByUserId = "API";
+      filteredData.addedByUserId = data.addedByUserId ?? "api";
     }
+
 
     const requiredFields: (keyof WaypointData)[] = [
       "name",

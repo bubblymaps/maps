@@ -16,11 +16,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import CoordinatePicker from "@/components/Map/coordinate-picker"
 import { Verified } from "@/components/Badges/verified"
-import { Waypoint } from "@/types/waypoints"
+import { Waypoint, WaypointLog } from "@/types/waypoints"
 import { useSession } from "next-auth/react"
 import { Admin } from "@/components/Badges/admin"
 import PointMap from "@/components/Map/point"
 import Header from "@/components/header"
+import { WaypointLogsList } from "@/components/WaypointLog"
 
 interface Review {
     id: number
@@ -42,6 +43,7 @@ export default function WaypointPage() {
     const { id } = useParams()
     const { data: session, status } = useSession()
     const [waypoint, setWaypoint] = useState<Waypoint | null>(null)
+    const [waypointLogs, setWaypointLogs] = useState<WaypointLog[]>([])
     const [reviews, setReviews] = useState<Review[]>([])
     const [avgRating, setAvgRating] = useState(0)
     const [submitting, setSubmitting] = useState(false)
@@ -73,7 +75,8 @@ export default function WaypointPage() {
             try {
                 const res = await fetch(`/api/waypoints/${id}`)
                 const data = await res.json()
-                setWaypoint(data)
+                setWaypoint(data.waypoint)
+                setWaypointLogs(data.logs || [])
             } catch (err) {
                 console.error("Failed to fetch waypoint", err)
             }
@@ -275,7 +278,7 @@ export default function WaypointPage() {
     const getChanges = useMemo(() => {
         if (!waypoint) return []
         const changes: Array<{ field: string; old: string; new: string }> = []
-        
+
         if (editData.name !== waypoint.name) {
             changes.push({ field: "Name", old: waypoint.name, new: editData.name })
         }
@@ -297,18 +300,18 @@ export default function WaypointPage() {
         if (editData.longitude.toFixed(6) !== waypoint.longitude.toFixed(6)) {
             changes.push({ field: "Longitude", old: waypoint.longitude.toFixed(6), new: editData.longitude.toFixed(6) })
         }
-        
-        const originalAmenities = Array.isArray(waypoint.amenities) ? waypoint.amenities : 
-                                 typeof waypoint.amenities === "string" ? JSON.parse(waypoint.amenities) : []
+
+        const originalAmenities = Array.isArray(waypoint.amenities) ? waypoint.amenities :
+            typeof waypoint.amenities === "string" ? JSON.parse(waypoint.amenities) : []
         const amenitiesChanged = JSON.stringify(editData.amenities.sort()) !== JSON.stringify(originalAmenities.sort())
         if (amenitiesChanged) {
-            changes.push({ 
-                field: "Amenities", 
-                old: originalAmenities.join(", ") || "(none)", 
-                new: editData.amenities.join(", ") || "(none)" 
+            changes.push({
+                field: "Amenities",
+                old: originalAmenities.join(", ") || "(none)",
+                new: editData.amenities.join(", ") || "(none)"
             })
         }
-        
+
         return changes
     }, [waypoint, editData])
     const renderStars = (rating: number) => {
@@ -338,7 +341,7 @@ export default function WaypointPage() {
     return (
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
             <Header />
-            
+
             {waypoint.image && (
                 <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-xl shadow-xl">
                     <Image
@@ -419,7 +422,7 @@ export default function WaypointPage() {
                                     <div className="relative overflow-hidden border border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-5 rounded-xl space-y-3">
                                         {/* Decorative corner */}
                                         <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-bl-full"></div>
-                                        
+
                                         <div className="relative">
                                             <div className="flex items-start justify-between gap-3 mb-3">
                                                 <div className="space-y-2">
@@ -438,9 +441,9 @@ export default function WaypointPage() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <Button 
-                                                    size="sm" 
-                                                    variant="ghost" 
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
                                                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                                     onClick={deleteMyReview}
                                                     disabled={deleting}
@@ -472,8 +475,8 @@ export default function WaypointPage() {
                                                         <Star
                                                             className={
                                                                 "h-8 w-8 transition-all duration-200 " +
-                                                                (ratingInput >= i 
-                                                                    ? "text-yellow-500 fill-yellow-500 drop-shadow-sm" 
+                                                                (ratingInput >= i
+                                                                    ? "text-yellow-500 fill-yellow-500 drop-shadow-sm"
                                                                     : "text-gray-300 dark:text-gray-600 group-hover:text-yellow-400 dark:group-hover:text-yellow-500")
                                                             }
                                                         />
@@ -488,11 +491,11 @@ export default function WaypointPage() {
                                             </div>
                                             {ratingInput > 0 && (
                                                 <p className="text-xs text-muted-foreground pl-1">
-                                                    {ratingInput === 5 ? "Excellent!" : 
-                                                     ratingInput === 4 ? "Very good" : 
-                                                     ratingInput === 3 ? "Good" : 
-                                                     ratingInput === 2 ? "Could be better" : 
-                                                     "Needs improvement"}
+                                                    {ratingInput === 5 ? "Excellent!" :
+                                                        ratingInput === 4 ? "Very good" :
+                                                            ratingInput === 3 ? "Good" :
+                                                                ratingInput === 2 ? "Could be better" :
+                                                                    "Needs improvement"}
                                                 </p>
                                             )}
                                         </div>
@@ -519,9 +522,9 @@ export default function WaypointPage() {
                                             <p className="text-xs text-muted-foreground">
                                                 Your review will be public
                                             </p>
-                                            <Button 
-                                                size="default" 
-                                                disabled={!ratingInput || submitting} 
+                                            <Button
+                                                size="default"
+                                                disabled={!ratingInput || submitting}
                                                 onClick={submitReview}
                                                 className="min-w-[120px]"
                                             >
@@ -589,116 +592,115 @@ export default function WaypointPage() {
 
                                         <div className="space-y-3">
                                             {paginatedReviews.map(r => {
-                                            const isMyReview = session?.user?.id === r.user.id
-                                            const reviewDate = r.createdAt ? new Date(r.createdAt) : null
-                                            const now = new Date()
-                                            let timeAgo = ""
-                                            
-                                            if (reviewDate) {
-                                                const diffMs = now.getTime() - reviewDate.getTime()
-                                                const diffMins = Math.floor(diffMs / 60000)
-                                                const diffHours = Math.floor(diffMs / 3600000)
-                                                const diffDays = Math.floor(diffMs / 86400000)
-                                                const diffMonths = Math.floor(diffDays / 30)
-                                                const diffYears = Math.floor(diffDays / 365)
-                                                
-                                                if (diffMins < 1) timeAgo = "Just now"
-                                                else if (diffMins < 60) timeAgo = `${diffMins}m ago`
-                                                else if (diffHours < 24) timeAgo = `${diffHours}h ago`
-                                                else if (diffDays < 30) timeAgo = `${diffDays}d ago`
-                                                else if (diffMonths < 12) timeAgo = `${diffMonths}mo ago`
-                                                else timeAgo = `${diffYears}y ago`
-                                            }
-                                            
-                                            return (
-                                                <div 
-                                                    key={r.id} 
-                                                    className={`group border rounded-xl p-5 transition-all duration-200 ${
-                                                        isMyReview 
-                                                            ? "bg-primary/5 border-primary/30 hover:border-primary/50 hover:shadow-lg" 
-                                                            : "bg-card border-border/60 hover:border-border hover:shadow-md"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="relative">
-                                                            {r.user.image ? (
-                                                                <img
-                                                                    src={r.user.image}
-                                                                    alt={r.user.handle}
-                                                                    className="w-10 h-10 rounded-full border-2 border-border/40 flex-shrink-0 object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-10 h-10 rounded-full border-2 border-border/40 flex-shrink-0 bg-muted flex items-center justify-center">
-                                                                    <span className="text-sm font-semibold text-muted-foreground">
-                                                                        {r.user.handle.charAt(0).toUpperCase()}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                const isMyReview = session?.user?.id === r.user.id
+                                                const reviewDate = r.createdAt ? new Date(r.createdAt) : null
+                                                const now = new Date()
+                                                let timeAgo = ""
 
-                                                        {/* Content */}
-                                                        <div className="flex-1 min-w-0 space-y-2">
-                                                            {/* Header with user info and stars */}
-                                                            <div className="flex items-start justify-between gap-3">
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                                        <span className="text-sm font-semibold text-foreground">
-                                                                            @{r.user.handle}
+                                                if (reviewDate) {
+                                                    const diffMs = now.getTime() - reviewDate.getTime()
+                                                    const diffMins = Math.floor(diffMs / 60000)
+                                                    const diffHours = Math.floor(diffMs / 3600000)
+                                                    const diffDays = Math.floor(diffMs / 86400000)
+                                                    const diffMonths = Math.floor(diffDays / 30)
+                                                    const diffYears = Math.floor(diffDays / 365)
+
+                                                    if (diffMins < 1) timeAgo = "Just now"
+                                                    else if (diffMins < 60) timeAgo = `${diffMins}m ago`
+                                                    else if (diffHours < 24) timeAgo = `${diffHours}h ago`
+                                                    else if (diffDays < 30) timeAgo = `${diffDays}d ago`
+                                                    else if (diffMonths < 12) timeAgo = `${diffMonths}mo ago`
+                                                    else timeAgo = `${diffYears}y ago`
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={r.id}
+                                                        className={`group border rounded-xl p-5 transition-all duration-200 ${isMyReview
+                                                            ? "bg-primary/5 border-primary/30 hover:border-primary/50 hover:shadow-lg"
+                                                            : "bg-card border-border/60 hover:border-border hover:shadow-md"
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="relative">
+                                                                {r.user.image ? (
+                                                                    <img
+                                                                        src={r.user.image}
+                                                                        alt={r.user.handle}
+                                                                        className="w-10 h-10 rounded-full border-2 border-border/40 flex-shrink-0 object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-10 h-10 rounded-full border-2 border-border/40 flex-shrink-0 bg-muted flex items-center justify-center">
+                                                                        <span className="text-sm font-semibold text-muted-foreground">
+                                                                            {r.user.handle.charAt(0).toUpperCase()}
                                                                         </span>
-                                                                        {r.user.verified && <Verified
-                                                                            content={
-                                                                                <p className="text-zinc-700 dark:text-zinc-300">
-                                                                                    Official account of a government, organization, or recognized entity.{" "}
-                                                                                    <Link
-                                                                                        href="/help/verified"
-                                                                                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2"
-                                                                                    >
-                                                                                        Learn more.
-                                                                                    </Link>
-                                                                                </p>
-                                                                            }
-                                                                        />}
-                                                                        {r.user.moderator && <Admin />}
-                                                                        {isMyReview && (
-                                                                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                                                                                You
-                                                                            </span>
-                                                                        )}
                                                                     </div>
-                                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                                        {timeAgo && (
-                                                                            <>
-                                                                                <span>{timeAgo}</span>
-                                                                                {reviewDate && (
-                                                                                    <>
-                                                                                        <span>•</span>
-                                                                                        <span className="hidden sm:inline" title={reviewDate.toLocaleString()}>
-                                                                                            {reviewDate.toLocaleDateString()}
-                                                                                        </span>
-                                                                                    </>
-                                                                                )}
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                {/* Star rating */}
-                                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                                    {renderStars(r.rating)}
-                                                                </div>
+                                                                )}
                                                             </div>
 
-                                                            {/* Comment */}
-                                                            {r.comment && (
-                                                                <p className="text-sm text-foreground/90 leading-relaxed pt-1">
-                                                                    {r.comment}
-                                                                </p>
-                                                            )}
+                                                            {/* Content */}
+                                                            <div className="flex-1 min-w-0 space-y-2">
+                                                                {/* Header with user info and stars */}
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <span className="text-sm font-semibold text-foreground">
+                                                                                @{r.user.handle}
+                                                                            </span>
+                                                                            {r.user.verified && <Verified
+                                                                                content={
+                                                                                    <p className="text-zinc-700 dark:text-zinc-300">
+                                                                                        Official account of a government, organization, or recognized entity.{" "}
+                                                                                        <Link
+                                                                                            href="/help/verified"
+                                                                                            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2"
+                                                                                        >
+                                                                                            Learn more.
+                                                                                        </Link>
+                                                                                    </p>
+                                                                                }
+                                                                            />}
+                                                                            {r.user.moderator && <Admin />}
+                                                                            {isMyReview && (
+                                                                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                                                                                    You
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                            {timeAgo && (
+                                                                                <>
+                                                                                    <span>{timeAgo}</span>
+                                                                                    {reviewDate && (
+                                                                                        <>
+                                                                                            <span>•</span>
+                                                                                            <span className="hidden sm:inline" title={reviewDate.toLocaleString()}>
+                                                                                                {reviewDate.toLocaleDateString()}
+                                                                                            </span>
+                                                                                        </>
+                                                                                    )}
+                                                                                </>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Star rating */}
+                                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                                        {renderStars(r.rating)}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Comment */}
+                                                                {r.comment && (
+                                                                    <p className="text-sm text-foreground/90 leading-relaxed pt-1">
+                                                                        {r.comment}
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            )
-                                        })}
+                                                )
+                                            })}
                                         </div>
 
                                         {/* Pagination Controls */}
@@ -713,13 +715,13 @@ export default function WaypointPage() {
                                                 >
                                                     Previous
                                                 </Button>
-                                                
+
                                                 <div className="flex items-center gap-1">
                                                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
                                                         // Show first page, last page, current page, and pages around current
-                                                        const showPage = page === 1 || 
-                                                                        page === totalPages || 
-                                                                        Math.abs(page - currentPage) <= 1
+                                                        const showPage = page === 1 ||
+                                                            page === totalPages ||
+                                                            Math.abs(page - currentPage) <= 1
 
                                                         if (!showPage) {
                                                             // Show ellipsis
@@ -763,233 +765,244 @@ export default function WaypointPage() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {waypointLogs.length > 0 && (
+                        <Card className="shadow-lg border-border/60">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base font-semibold">Change History</CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                                <WaypointLogsList logs={waypointLogs} />
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
                 <div className="lg:col-span-1 space-y-6">
-                    <Card className="shadow-lg border-border/60 sticky top-6">
+                    <Card className="shadow-lg border-border/60">
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg font-semibold">Details</CardTitle>
                                 <div className="flex items-center gap-2">
                                     {session && (
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <Button size="sm" variant="outline" className="h-8 gap-2">
-                                                            <Flag className="h-3.5 w-3.5" />
-                                                            Report
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="max-w-md">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Report an Issue</DialogTitle>
-                                                        </DialogHeader>
-                                                        {reportSubmitted ? (
-                                                            <div className="py-8 text-center space-y-3">
-                                                                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto">
-                                                                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                    </svg>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button size="sm" variant="outline" className="h-8 gap-2">
+                                                                <Flag className="h-3.5 w-3.5" />
+                                                                Report
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="max-w-md">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Report an Issue</DialogTitle>
+                                                            </DialogHeader>
+                                                            {reportSubmitted ? (
+                                                                <div className="py-8 text-center space-y-3">
+                                                                    <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto">
+                                                                        <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <p className="text-sm font-medium">Report submitted successfully</p>
+                                                                    <p className="text-xs text-muted-foreground">Thank you for helping keep our community safe</p>
                                                                 </div>
-                                                                <p className="text-sm font-medium">Report submitted successfully</p>
-                                                                <p className="text-xs text-muted-foreground">Thank you for helping keep our community safe</p>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="space-y-4 py-4">
-                                                                <div className="space-y-2">
-                                                                    <Label htmlFor="report-reason">What's the issue with this waypoint?</Label>
-                                                                    <Textarea
-                                                                        id="report-reason"
-                                                                        value={reportReason}
-                                                                        onChange={(e) => setReportReason(e.target.value)}
-                                                                        placeholder="Describe the issue (e.g., incorrect location, inappropriate content, spam, etc.)"
-                                                                        rows={5}
-                                                                        className="resize-none"
-                                                                    />
-                                                                    <p className="text-xs text-muted-foreground">
-                                                                        {reportReason.length} characters
-                                                                    </p>
+                                                            ) : (
+                                                                <div className="space-y-4 py-4">
+                                                                    <div className="space-y-2">
+                                                                        <Label htmlFor="report-reason">What's the issue with this waypoint?</Label>
+                                                                        <Textarea
+                                                                            id="report-reason"
+                                                                            value={reportReason}
+                                                                            onChange={(e) => setReportReason(e.target.value)}
+                                                                            placeholder="Describe the issue (e.g., incorrect location, inappropriate content, spam, etc.)"
+                                                                            rows={5}
+                                                                            className="resize-none"
+                                                                        />
+                                                                        <p className="text-xs text-muted-foreground">
+                                                                            {reportReason.length} characters
+                                                                        </p>
+                                                                    </div>
+                                                                    <DialogFooter>
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            onClick={() => setReportDialogOpen(false)}
+                                                                            disabled={submittingReport}
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
+                                                                        <Button
+                                                                            onClick={submitReport}
+                                                                            disabled={!reportReason.trim() || submittingReport}
+                                                                        >
+                                                                            {submittingReport ? "Submitting..." : "Submit Report"}
+                                                                        </Button>
+                                                                    </DialogFooter>
                                                                 </div>
-                                                                <DialogFooter>
-                                                                    <Button 
-                                                                        variant="outline" 
-                                                                        onClick={() => setReportDialogOpen(false)}
-                                                                        disabled={submittingReport}
-                                                                    >
-                                                                        Cancel
-                                                                    </Button>
-                                                                    <Button 
-                                                                        onClick={submitReport}
-                                                                        disabled={!reportReason.trim() || submittingReport}
-                                                                    >
-                                                                        {submittingReport ? "Submitting..." : "Submit Report"}
-                                                                    </Button>
-                                                                </DialogFooter>
-                                                            </div>
-                                                        )}
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Report an issue with this waypoint</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                                            )}
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Report an issue with this waypoint</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     )}
                                     {session && (
-                                    <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button size="sm" variant="outline" className="h-8 gap-2">
-                                                <Pencil className="h-3.5 w-3.5" />
-                                                Edit
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                                            <DialogHeader>
-                                                <DialogTitle>Edit Waypoint Details</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="space-y-4 py-4">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="name">Name</Label>
-                                                    <Input
-                                                        id="name"
-                                                        value={editData.name}
-                                                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                                        placeholder="Bubbler name"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="description">Description</Label>
-                                                    <Textarea
-                                                        id="description"
-                                                        value={editData.description}
-                                                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                                                        placeholder="Describe this bubbler..."
-                                                        rows={4}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="image">Image URL</Label>
-                                                    <Input
-                                                        id="image"
-                                                        value={editData.image}
-                                                        onChange={(e) => setEditData({ ...editData, image: e.target.value })}
-                                                        placeholder="https://example.com/image.jpg"
-                                                    />
-                                                    <div className="mt-2">
-                                                        {editData.image ? (
-                                                            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border/60 bg-muted/20">
-                                                                {/* Use plain img to avoid Next.js remotePatterns limits in preview */}
-                                                                <img
-                                                                    src={editData.image}
-                                                                    alt="Image preview"
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="w-full h-24 rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground flex items-center justify-center">
-                                                                Enter a URL to preview
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
+                                        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                                            <DialogTrigger asChild>
+                                                <Button size="sm" variant="outline" className="h-8 gap-2">
+                                                    <Pencil className="h-3.5 w-3.5" />
+                                                    Edit
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                                <DialogHeader>
+                                                    <DialogTitle>Edit Waypoint Details</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="space-y-4 py-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="maintainer">Maintainer</Label>
+                                                        <Label htmlFor="name">Name</Label>
                                                         <Input
-                                                            id="maintainer"
-                                                            value={editData.maintainer}
-                                                            onChange={(e) => setEditData({ ...editData, maintainer: e.target.value })}
-                                                            placeholder="Maintainer name"
+                                                            id="name"
+                                                            value={editData.name}
+                                                            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                                            placeholder="Bubbler name"
                                                         />
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="region">Region</Label>
-                                                        <Input
-                                                            id="region"
-                                                            value={editData.region}
-                                                            onChange={(e) => setEditData({ ...editData, region: e.target.value })}
-                                                            placeholder="Region"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>Location (Drag map to adjust)</Label>
-                                                    <CoordinatePicker
-                                                        longitude={editData.longitude}
-                                                        latitude={editData.latitude}
-                                                        zoom={16}
-                                                        className="w-full h-80 rounded-lg border border-border/60"
-                                                        onCoordinateChange={(lng, lat) => {
-                                                            setEditData({ ...editData, longitude: lng, latitude: lat })
-                                                        }}
-                                                    />
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor="latitude">Latitude</Label>
-                                                        <Input
-                                                            id="latitude"
-                                                            type="number"
-                                                            step="0.000001"
-                                                            value={editData.latitude.toFixed(6)}
-                                                            onChange={(e) => setEditData({ ...editData, latitude: parseFloat(e.target.value) || 0 })}
-                                                            placeholder="Latitude"
-                                                            className="font-mono text-sm"
+                                                        <Label htmlFor="description">Description</Label>
+                                                        <Textarea
+                                                            id="description"
+                                                            value={editData.description}
+                                                            onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                                                            placeholder="Describe this bubbler..."
+                                                            rows={4}
                                                         />
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="longitude">Longitude</Label>
+                                                        <Label htmlFor="image">Image URL</Label>
                                                         <Input
-                                                            id="longitude"
-                                                            type="number"
-                                                            step="0.000001"
-                                                            value={editData.longitude.toFixed(6)}
-                                                            onChange={(e) => setEditData({ ...editData, longitude: parseFloat(e.target.value) || 0 })}
-                                                            placeholder="Longitude"
-                                                            className="font-mono text-sm"
+                                                            id="image"
+                                                            value={editData.image}
+                                                            onChange={(e) => setEditData({ ...editData, image: e.target.value })}
+                                                            placeholder="https://example.com/image.jpg"
+                                                        />
+                                                        <div className="mt-2">
+                                                            {editData.image ? (
+                                                                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border/60 bg-muted/20">
+                                                                    {/* Use plain img to avoid Next.js remotePatterns limits in preview */}
+                                                                    <img
+                                                                        src={editData.image}
+                                                                        alt="Image preview"
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="w-full h-24 rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground flex items-center justify-center">
+                                                                    Enter a URL to preview
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="maintainer">Maintainer</Label>
+                                                            <Input
+                                                                id="maintainer"
+                                                                value={editData.maintainer}
+                                                                onChange={(e) => setEditData({ ...editData, maintainer: e.target.value })}
+                                                                placeholder="Maintainer name"
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="region">Region</Label>
+                                                            <Input
+                                                                id="region"
+                                                                value={editData.region}
+                                                                onChange={(e) => setEditData({ ...editData, region: e.target.value })}
+                                                                placeholder="Region"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>Location (Drag map to adjust)</Label>
+                                                        <CoordinatePicker
+                                                            longitude={editData.longitude}
+                                                            latitude={editData.latitude}
+                                                            zoom={16}
+                                                            className="w-full h-80 rounded-lg border border-border/60"
+                                                            onCoordinateChange={(lng, lat) => {
+                                                                setEditData({ ...editData, longitude: lng, latitude: lat })
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="latitude">Latitude</Label>
+                                                            <Input
+                                                                id="latitude"
+                                                                type="number"
+                                                                step="0.000001"
+                                                                value={editData.latitude.toFixed(6)}
+                                                                onChange={(e) => setEditData({ ...editData, latitude: parseFloat(e.target.value) || 0 })}
+                                                                placeholder="Latitude"
+                                                                className="font-mono text-sm"
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="longitude">Longitude</Label>
+                                                            <Input
+                                                                id="longitude"
+                                                                type="number"
+                                                                step="0.000001"
+                                                                value={editData.longitude.toFixed(6)}
+                                                                onChange={(e) => setEditData({ ...editData, longitude: parseFloat(e.target.value) || 0 })}
+                                                                placeholder="Longitude"
+                                                                className="font-mono text-sm"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="amenities">Amenities (comma-separated)</Label>
+                                                        <Input
+                                                            id="amenities"
+                                                            value={editData.amenities.join(", ")}
+                                                            onChange={(e) => setEditData({
+                                                                ...editData,
+                                                                amenities: e.target.value.split(",").map(a => a.trim()).filter(Boolean)
+                                                            })}
+                                                            placeholder="e.g., Wheelchair accessible, Water fountain, Bottle refill"
                                                         />
                                                     </div>
                                                 </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="amenities">Amenities (comma-separated)</Label>
-                                                    <Input
-                                                        id="amenities"
-                                                        value={editData.amenities.join(", ")}
-                                                        onChange={(e) => setEditData({
-                                                            ...editData,
-                                                            amenities: e.target.value.split(",").map(a => a.trim()).filter(Boolean)
-                                                        })}
-                                                        placeholder="e.g., Wheelchair accessible, Water fountain, Bottle refill"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-                                                <p className="text-xs text-muted-foreground text-center sm:text-left">
-                                                    By updating a waypoint, you agree to the platform terms and privacy policies.
-                                                </p>
-                                                <div className="flex gap-2 justify-end">
-                                                    <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                                                        Cancel
-                                                    </Button>
-                                                    <Button onClick={handleSaveClick} disabled={updating}>
-                                                        {updating ? "Saving..." : "Save Changes"}
-                                                    </Button>
-                                                </div>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
+                                                <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+                                                    <p className="text-xs text-muted-foreground text-center sm:text-left">
+                                                        By updating a waypoint, you agree to the platform terms and privacy policies.
+                                                    </p>
+                                                    <div className="flex gap-2 justify-end">
+                                                        <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                                                            Cancel
+                                                        </Button>
+                                                        <Button onClick={handleSaveClick} disabled={updating}>
+                                                            {updating ? "Saving..." : "Save Changes"}
+                                                        </Button>
+                                                    </div>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    )}
                                 </div>
 
                                 {/* Confirmation Dialog */}
@@ -1001,7 +1014,7 @@ export default function WaypointPage() {
                                                 Please review the changes you're about to make to this waypoint.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        
+
                                         <div className="py-4">
                                             {getChanges.length === 0 ? (
                                                 <p className="text-sm text-muted-foreground text-center py-4">
@@ -1042,8 +1055,8 @@ export default function WaypointPage() {
 
                                         <AlertDialogFooter>
                                             <AlertDialogCancel disabled={updating}>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction 
-                                                onClick={confirmUpdateWaypoint} 
+                                            <AlertDialogAction
+                                                onClick={confirmUpdateWaypoint}
                                                 disabled={updating || getChanges.length === 0}
                                             >
                                                 {updating ? "Saving..." : "Confirm & Save"}
@@ -1055,10 +1068,12 @@ export default function WaypointPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-3 text-sm">
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Maintainer</span>
-                                    <span className="text-foreground/80">{waypoint.maintainer}</span>
-                                </div>
+                                {waypoint.region && waypoint.region.trim() !== "" && (
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Maintainer</span>
+                                        <span className="text-foreground/80">{waypoint.maintainer}</span>
+                                    </div>
+                                )}
 
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added By</span>
@@ -1083,10 +1098,12 @@ export default function WaypointPage() {
                                     </span>
                                 </div>
 
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Region</span>
-                                    <span className="text-foreground/80">{waypoint.region}</span>
-                                </div>
+                                {waypoint.region && waypoint.region.trim() !== "" && (
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Region</span>
+                                        <span className="text-foreground/80">{waypoint.region}</span>
+                                    </div>
+                                )}
 
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Coordinates</span>
@@ -1098,8 +1115,8 @@ export default function WaypointPage() {
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</span>
                                     <span className={`inline-flex items-center w-fit px-2 py-1 rounded-full text-xs font-medium ${waypoint.approved
-                                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                            : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                        : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
                                         }`}>
                                         {waypoint.approved ? "Approved" : "Pending Approval"}
                                     </span>

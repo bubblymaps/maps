@@ -29,3 +29,13 @@ export interface Waypoint {
     updatedAt: string | Date
   }[]
 }
+
+export interface WaypointLog {
+  id: number
+  bubblerId: number
+  userId?: string | null
+  action: string
+  oldData?: Record<string, any> | null
+  newData?: Record<string, any> | null
+  createdAt: string | Date
+}

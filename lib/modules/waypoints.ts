@@ -32,6 +32,43 @@ export interface WaypointUpdateData {
 }
 
 export class Waypoints {
+    static async logChange(
+        bubblerId: number,
+        userId: string | null,
+        action: "CREATE" | "UPDATE" | "DELETE",
+        oldData?: any,
+        newData?: any
+    ) {
+        return prisma.bubblerLog.create({
+            data: {
+                bubblerId,
+                userId,
+                action,
+                oldData: oldData || null,
+                newData: newData || null,
+            },
+        });
+    }
+
+    static async fetchLogs(bubblerId: number) {
+        return prisma.bubblerLog.findMany({
+            where: { bubblerId },
+            orderBy: { createdAt: "desc" },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        handle: true,
+                        displayName: true,
+                        image: true,
+                        verified: true,
+                        moderator: true,
+                    },
+                },
+            },
+        });
+    }
+
     static async get(id: number) {
         try {
             const bubbler = await prisma.bubbler.findUnique({
@@ -83,23 +120,30 @@ export class Waypoints {
             },
         });
 
+        await this.logChange(newBubbler.id, addedByUserId, "CREATE", null, newBubbler);
+
         return newBubbler;
     }
 
-    static async delete(id: number) {
+    static async delete(id: number, userId: string | null = null) {
         try {
+            const oldBubbler = await this.get(id);
             const deletedBubbler = await prisma.bubbler.delete(
                 {
                     where: { id },
                 }
             );
+
+            await this.logChange(id, userId ?? oldBubbler.addedByUserId, "DELETE", oldBubbler, null);
+
             return deletedBubbler;
         } catch (err: any) {
             throw new Error(err.message || "There was an issue deleting this waypoint");
         }
     }
 
-    static async edit(id: number, data: WaypointUpdateData) {
+    static async edit(id: number, data: WaypointUpdateData, userId: string | null = null) {
+        const oldBubbler = await this.get(id);
         try {
             const updatedBubbler = await prisma.bubbler.update(
                 {
@@ -107,6 +151,8 @@ export class Waypoints {
                     data,
                 }
             );
+            
+            await this.logChange(id, userId ?? oldBubbler.addedByUserId, "UPDATE", oldBubbler, updatedBubbler);
 
             return updatedBubbler;
 

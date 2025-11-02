@@ -27,25 +27,27 @@ model User {
   reviews     Review[]
   bubblers    Bubbler[]
   ReportAbuse ReportAbuse[]
+  BubblerLog  BubblerLog[]
 }
 
 model Bubbler {
-  id            Int      @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   name          String
   latitude      Float
   longitude     Float
   description   String?
   addedByUserId String?
-  addedBy       User?    @relation(fields: [addedByUserId], references: [id])
-  amenities     String[] @default([])
-  verified      Boolean  @default(false)
-  approved      Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  addedBy       User?        @relation(fields: [addedByUserId], references: [id])
+  amenities     String[]     @default([])
+  verified      Boolean      @default(false)
+  approved      Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   image         String?
   maintainer    String?
   region        String?
   reviews       Review[]
+  BubblerLog    BubblerLog[]
 
   @@unique([latitude, longitude])
 }
@@ -96,6 +98,22 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model BubblerLog {
+  id        Int      @id @default(autoincrement())
+  bubblerId Int
+  userId    String?
+  action    String
+  oldData   Json?
+  newData   Json?
+  createdAt DateTime @default(now())
+
+  bubbler Bubbler @relation(fields: [bubblerId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([bubblerId])
+  @@index([userId])
 }
 
 model Session {
