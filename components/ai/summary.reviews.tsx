@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -13,38 +13,66 @@ export default function AIReviewSummary({ reviews }: Props) {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState("");
   const [displayed, setDisplayed] = useState("");
+  const fetchingRef = useRef(false);
+  const lastKeyRef = useRef<string | null>(null);
+  const reviewsKey = JSON.stringify(reviews.map(r => ({ r: r.rating, c: r.comment })));
 
   useEffect(() => {
     if (reviews.length < 2) return;
 
+    // Compute a lightweight key for the reviews so we only refetch when content changes
+    if (reviewsKey === lastKeyRef.current) return;
+
+    // Avoid duplicate fetches
+    if (fetchingRef.current) return;
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     const fetchSummary = async () => {
+      fetchingRef.current = true;
+      setLoading(true);
       try {
-        const res = await fetch("/api/ai/reviews-summary", {
+        const res = await fetch("https://api.bubblymaps.org/ai/summarise", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reviews }),
+          body: JSON.stringify({ prompt: JSON.stringify(reviews) }),
+          signal,
         });
+        if (!res.ok) throw new Error(`AI request failed (${res.status})`);
         const data = await res.json();
-        const text = data.summary;
+        const text = data.response;
         setSummary(text);
-      } catch (err) {
-        setSummary("Failed to generate AI summary.");
-      } finally {
+        lastKeyRef.current = reviewsKey;
         setLoading(false);
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          // aborted due to unmount or dependency change; keep loading=true so UI remains in loading state
+          return;
+        }
+        setSummary("There was an issue whilst generating the summary for this waypoint. Please try again later.");
+        setLoading(false);
+      } finally {
+        fetchingRef.current = false;
       }
     };
 
     fetchSummary();
-  }, [reviews]);
 
-  // Typing animation
+    return () => {
+      controller.abort();
+      // don't set loading false here; let the next successful fetch clear it
+      fetchingRef.current = false;
+    };
+  }, [reviewsKey, reviews.length]);
+
   useEffect(() => {
     if (!summary) return;
     let i = 0;
     const interval = setInterval(() => {
       setDisplayed(summary.slice(0, i++));
       if (i > summary.length) clearInterval(interval);
-    }, 30); // speed in ms per character
+    }, 5);
     return () => clearInterval(interval);
   }, [summary]);
 
