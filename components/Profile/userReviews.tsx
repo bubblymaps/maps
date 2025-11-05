@@ -42,8 +42,9 @@ export default function UserContributions({ userId }: { userId: string }) {
       try {
         const res = await fetch(`/api/reviews?userId=${userId}`)
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data: Review[] = await res.json()
-        setReviews(data)
+        const data = await res.json()
+        // API returns { reviews: Review[] }
+        setReviews(data?.reviews || [])
       } catch (error) {
         console.error("Failed to load reviews:", error)
       } finally {
@@ -100,7 +101,7 @@ export default function UserContributions({ userId }: { userId: string }) {
         {currentItems.map((review) => (
           <div
             key={review.id}
-            onClick={() => router.push(`/?bubbler=${review.bubbler.id}`)}
+            onClick={() => router.push(`/waypoint/${review.bubbler.id}`)}
             className="cursor-pointer flex flex-col gap-2 bg-muted/50 border rounded-lg p-3 hover:bg-muted transition"
           >
             <div className="flex items-center justify-between">

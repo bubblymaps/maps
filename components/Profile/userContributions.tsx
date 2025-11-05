@@ -91,7 +91,7 @@ export default function UserContributions({ userId }: { userId: string }) {
 
       <div className="space-y-3">
         {currentItems.map((bubbler) => (
-          <div key={bubbler.id} onClick={() => router.push(`/?bubbler=${bubbler.id}`)} className="cursor-pointer flex items-center justify-between bg-muted/50 border rounded-lg p-3">
+          <div key={bubbler.id} onClick={() => router.push(`/waypoint/${bubbler.id}`)} className="cursor-pointer flex items-center justify-between bg-muted/50 border rounded-lg p-3">
             <div className="flex items-center gap-3">
               <MapPin className="h-5 w-5 text-primary" />
               <div>

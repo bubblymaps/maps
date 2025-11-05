@@ -7,7 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, StarHalf, Sparkles, Pencil, Flag } from "lucide-react"
+import { Star, StarHalf, Sparkles, Pencil, Flag, ExternalLink, Copy, MapPin, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
@@ -69,6 +69,7 @@ export default function WaypointPage() {
     const [reportReason, setReportReason] = useState("")
     const [submittingReport, setSubmittingReport] = useState(false)
     const [reportSubmitted, setReportSubmitted] = useState(false)
+    const [copiedCoords, setCopiedCoords] = useState(false)
     const reviewsPerPage = 5
 
     useEffect(() => {
@@ -1119,17 +1120,74 @@ export default function WaypointPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-lg border-border/60">
-                        <CardHeader>
-                            <CardTitle className="text-lg font-semibold">Location</CardTitle>
+                    <Card className="shadow-lg border-border/60 overflow-hidden">
+                        <CardHeader className="flex items-center justify-between gap-3 pb-2">
+                            <div className="flex items-start gap-2">
+                                <MapPin className="h-5 w-5 text-primary mt-1" />
+                                <div>
+                                    <CardTitle className="text-lg font-semibold">Location</CardTitle>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <a
+                                                href={`/?lat=${waypoint.latitude}&lng=${waypoint.longitude}&zoom=18`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-border/40 bg-background/50 hover:bg-muted/20"
+                                            >
+                                                <ExternalLink className="h-4 w-4 text-foreground" />
+                                            </a>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Open in Maps</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigator.clipboard?.writeText(`${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}`);
+                                                    setCopiedCoords(true);
+                                                    setTimeout(() => setCopiedCoords(false), 1500);
+                                                }}
+                                                className="inline-flex items-center cursor-pointer justify-center h-8 w-8 rounded-md border border-border/40 bg-background/50 hover:bg-muted/20"
+                                            >
+                                                {copiedCoords ? (
+                                                    <Check className="h-4 w-4 text-green-600" />
+                                                ) : (
+                                                    <Copy className="h-4 w-4 text-foreground" />
+                                                )}
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{copiedCoords ? "Copied!" : "Copy coordinates"}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <PointMap
-                                longitude={waypoint.longitude}
-                                latitude={waypoint.latitude}
-                                zoom={15}
-                                className="w-full h-64 rounded-b-lg"
-                            />
+
+                        <CardContent className="p-0 relative">
+                            <div className="relative rounded-lg overflow-hidden">
+                                <PointMap
+                                    longitude={waypoint.longitude}
+                                    latitude={waypoint.latitude}
+                                    zoom={15}
+                                    className="w-full h-64"
+                                />
+
+                                <div className="absolute right-3 top-3 bg-background/80 backdrop-blur-sm border border-border/60 rounded-md px-3 py-3 text-xs">
+                                    <div className="font-medium text-foreground leading-none">
+                                        {waypoint.latitude.toFixed(5)}, {waypoint.longitude.toFixed(5)}
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

@@ -6,10 +6,14 @@ import { getServerSession } from "next-auth/next";
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
+    const userIdParam = url.searchParams.get("userId");
     const bubblerIdParam = url.searchParams.get("bubblerId");
     let reviews;
 
-    if (bubblerIdParam) {
+    if (userIdParam) {
+      // Fetch reviews by user id (string)
+      reviews = await Reviews.byUser(userIdParam);
+    } else if (bubblerIdParam) {
       const bubblerId = Number(bubblerIdParam);
       reviews = await Reviews.byBubbler(bubblerId);
     } else {

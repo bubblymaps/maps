@@ -327,6 +327,36 @@ export class Waypoints {
     }
 
     static async recent(limit: number = 10) {
-        return prisma.bubbler.findMany({ orderBy: { createdAt: "desc" }, take: limit });
+        return prisma.bubbler.findMany({
+            orderBy: { createdAt: "desc" },
+            take: limit,
+            include: {
+                addedBy: {
+                    select: {
+                        id: true,
+                        image: true,
+                        displayName: true,
+                        handle: true,
+                    },
+                },
+                reviews: {
+                    select: {
+                        id: true,
+                        bubblerId: true,
+                        userId: true,
+                        rating: true,
+                        comment: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        user: {
+                            select: {
+                                handle: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: "desc" },
+                },
+            },
+        });
     }
 }
