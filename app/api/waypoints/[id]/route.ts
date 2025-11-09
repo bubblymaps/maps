@@ -28,8 +28,9 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
     const session = await getServerSession(authOptions);
-    const apiToken = req.headers.get("authorization")?.replace("Bearer ", "");
-    const hasApiToken = apiToken && apiToken === process.env.API_TOKEN;
+  const apiToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const expectedToken = process.env.API_TOKEN || process.env.API_KEY;
+  const hasApiToken = !!apiToken && !!expectedToken && apiToken === expectedToken;
 
     if (!session && !hasApiToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -65,11 +66,12 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     const id = parseInt(idStr, 10);
     if (isNaN(id)) throw new Error("Invalid waypoint ID");
 
-    const apiToken = req.headers.get("authorization")?.replace("Bearer ", "");
-    const hasApiToken = apiToken && apiToken === process.env.API_TOKEN;
+  const apiToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const expectedToken = process.env.API_TOKEN || process.env.API_KEY;
+  const hasApiToken = !!apiToken && !!expectedToken && apiToken === expectedToken;
 
     if (!hasApiToken) {
-      return NextResponse.json({ error: "Unauthorized — API token required" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized — valid API token required" }, { status: 401 });
     }
 
     const deletedWaypoint = await Waypoints.delete(id);

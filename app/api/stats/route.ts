@@ -3,15 +3,16 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
 	try {
-		const [totalWaypoints, totalVerifiedWaypoints, totalUsers, totalReviews] = await Promise.all([
+		const [totalWaypoints, totalVerifiedWaypoints, totalUsers, totalReviews, totalContributions] = await Promise.all([
 			prisma.bubbler.count(),
 			prisma.bubbler.count({ where: { verified: true } }),
 			prisma.user.count(),
 			prisma.review.count(),
+			prisma.bubblerLog.count(),
 		]);
 
 		return NextResponse.json(
-			{ totalWaypoints, totalVerifiedWaypoints, totalUsers, totalReviews },
+			{ totalWaypoints, totalVerifiedWaypoints, totalUsers, totalReviews, totalContributions },
 			{ status: 200 }
 		);
 	} catch (err: any) {

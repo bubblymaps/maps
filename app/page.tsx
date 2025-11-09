@@ -26,6 +26,7 @@ import { MapScale } from "@/components/Map/scale"
 import { ZoomControl } from "@/components/Map/zoom"
 import { SearchBar, WaypointSearch } from "@/components/Map/search"
 import { AvatarManager } from "@/components/account"
+import Header from "@/components/header"
 
 interface Waypoint {
   id: number
@@ -286,6 +287,14 @@ export default function Page() {
 
   return (
     <div className="w-screen h-screen relative overflow-hidden">
+      {status !== "authenticated" && (
+        <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
+          {/* Header has its own interactive elements; allow clicks */}
+          <div className="pointer-events-auto">
+            <Header />
+          </div>
+        </div>
+      )}
       <MapBox
         styleURL={styleURL}
         center={initialCenter}
@@ -298,15 +307,17 @@ export default function Page() {
         }}
       />
 
-      <div className="fixed top-4 left-4 right-4 z-50 flex flex-row items-center gap-2">
+      <div className={"fixed z-40 flex flex-row items-center gap-2 left-4 right-4 " + (status !== "authenticated" ? "top-24" : "top-4")}>
         <div className="flex-1 min-w-0 sm:max-w-md">
           <WaypointSearch placeholder="Search waypoints..." onSelect={handleSelectWaypoint} />
         </div>
 
-        <div className="flex flex-row gap-2 shrink-0 ml-auto">
-          {status === "authenticated" ? <AvatarManager /> : <LoginBtn onClick={() => setShowLogin(true)} />}
-          <ThemeToggle />
-        </div>
+        {status === "authenticated" && (
+          <div className="flex flex-row gap-2 shrink-0 ml-auto">
+            <AvatarManager />
+            <ThemeToggle />
+          </div>
+        )}
       </div>
 
       <Watermark />

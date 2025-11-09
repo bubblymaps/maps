@@ -20,9 +20,9 @@ export default function Header() {
   const { data: session } = useSession()
 
   const items: Array<{ href: string; label: string; auth?: boolean }> = [
-    { href: "https://bubblymaps.org", label: "Home" },
-    { href: "https://docs.bubblymaps.org", label: "Docs" },
-    { href: "https://app.bubblymaps.org", label: "Maps" },
+    { href: "/home", label: "Home" },
+    { href: "/search", label: "Search" },
+    { href: "/", label: "Maps" },
     { href: "/settings", label: "Settings", auth: true },
   ]
 

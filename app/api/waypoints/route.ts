@@ -56,11 +56,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const apiToken = req.headers.get("authorization")?.replace("Bearer ", "");
-    const hasApiToken = apiToken && apiToken === process.env.API_KEY;
+    // Unified API token handling: support API_TOKEN (preferred) or legacy API_KEY for backward compatibility
+    const apiToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    const expectedToken = process.env.API_TOKEN || process.env.API_KEY; // prefer API_TOKEN
+    const hasApiToken = !!apiToken && !!expectedToken && apiToken === expectedToken;
 
     if (!session && !hasApiToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized: missing valid session or API token" }, { status: 401 });
     }
 
     const data = await req.json();
