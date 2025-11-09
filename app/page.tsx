@@ -24,7 +24,7 @@ import { Watermark } from "@/components/Map/watermark"
 import { Attribution } from "@/components/Map/attribution"
 import { MapScale } from "@/components/Map/scale"
 import { ZoomControl } from "@/components/Map/zoom"
-import { SearchBar } from "@/components/Map/search"
+import { SearchBar, WaypointSearch } from "@/components/Map/search"
 import { AvatarManager } from "@/components/account"
 
 interface Waypoint {
@@ -77,6 +77,56 @@ export default function Page() {
     params.set("lng", center.lng.toFixed(5))
     params.set("zoom", zoom.toFixed(2))
     router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  const handleSelectWaypoint = (item: Waypoint) => {
+    if (!map) return
+    ;(async () => {
+      // close previous popup if present
+      if (currentPopup) {
+        try {
+          currentPopup.remove()
+        } catch (e) {
+          // ignore
+        }
+        setCurrentPopup(null)
+      }
+
+      // Fetch full waypoint details from API to ensure popup shows same data as clicking a point
+      let full: any = item
+      try {
+        const res = await fetch(`/api/waypoints/${item.id}`)
+        if (res.ok) {
+          const body = await res.json()
+          if (body && body.waypoint) full = body.waypoint
+        }
+      } catch (e) {
+        // ignore and fall back to provided item
+      }
+
+      const coords: [number, number] = [full.longitude ?? item.longitude, full.latitude ?? item.latitude]
+      map.easeTo({ center: coords, zoom: 14, duration: 700 })
+
+      const popupNode = document.createElement("div")
+      ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={full} />)
+
+      const popup = new maplibregl.Popup({
+        offset: 10,
+        closeOnClick: true,
+      })
+        .setLngLat(coords)
+        .setDOMContent(popupNode)
+        .addTo(map)
+
+      const handleClose = () => {
+        setCurrentPopup(null)
+      }
+
+      popup.on("close", handleClose)
+      ;(popup as any)._closeHandler = handleClose
+
+      setCurrentPopup(popup)
+    })()
   }
 
   useEffect(() => {
@@ -250,7 +300,7 @@ export default function Page() {
 
       <div className="fixed top-4 left-4 right-4 z-50 flex flex-row items-center gap-2">
         <div className="flex-1 min-w-0 sm:max-w-md">
-          <SearchBar placeholder="Search something..." onSearch={(val) => handleSearch(val)} />
+          <WaypointSearch placeholder="Search waypoints..." onSelect={handleSelectWaypoint} />
         </div>
 
         <div className="flex flex-row gap-2 shrink-0 ml-auto">

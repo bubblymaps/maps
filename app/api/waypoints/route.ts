@@ -9,8 +9,27 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get("userId")
+  const q = searchParams.get("q")
 
   try {
+    if (q) {
+      // simple search endpoint used by the client dropdown — return minimal fields
+      const results = await prisma.bubbler.findMany({
+        where: {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { amenities: { has: q } },
+          ],
+        },
+        take: 20,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, name: true, latitude: true, longitude: true, verified: true, approved: true },
+      })
+
+      return NextResponse.json(results)
+    }
+
     const waypoints = await prisma.bubbler.findMany(
       {
         where: userId ? { addedByUserId: userId } : undefined,
