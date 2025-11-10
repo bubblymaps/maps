@@ -371,7 +371,10 @@ export default function WaypointPage() {
                             <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-4">
                                     <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl font-bold">
-                                        {waypoint.name}
+                                        <div className="flex items-baseline gap-2">
+                                            <span>{waypoint.name}</span>
+                                            <span className="text-sm font-mono text-foreground/60">id:{waypoint.id}</span>
+                                        </div>
                                         {waypoint.verified && <Verified content={
                                             <p className="text-sm text-foreground/90 leading-relaxed">
                                                 Officially verified bubbler from{" "}
@@ -628,9 +631,9 @@ export default function WaypointPage() {
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 flex-wrap">
-                                                                            <span className="text-sm font-semibold text-foreground">
+                                                                            <Link href={`/profile/${r.user.handle}`} className="text-sm font-semibold text-foreground hover:underline">
                                                                                 @{r.user.handle}
-                                                                            </span>
+                                                                            </Link>
                                                                             {r.user.verified && <Verified
                                                                                 content={
                                                                                     <p className="text-zinc-700 dark:text-zinc-300">
@@ -1062,7 +1065,13 @@ export default function WaypointPage() {
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added By</span>
                                     <span className="text-foreground/80 flex items-center gap-1.5">
-                                        @{waypoint.addedBy?.handle}
+                                        {waypoint.addedBy?.handle ? (
+                                            <Link href={`/profile/${waypoint.addedBy.handle}`} className="font-semibold text-foreground hover:underline">
+                                                @{waypoint.addedBy.handle}
+                                            </Link>
+                                        ) : (
+                                            <>@{waypoint.addedBy?.handle}</>
+                                        )}
                                         {waypoint.addedBy?.verified && (
                                             <Verified
                                                 content={
