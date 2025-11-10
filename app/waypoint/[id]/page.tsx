@@ -21,6 +21,7 @@ import { useSession } from "next-auth/react"
 import { Admin } from "@/components/Badges/admin"
 import PointMap from "@/components/Map/point"
 import Header from "@/components/header"
+import NotFound from "@/components/404"
 import { WaypointLogsList } from "@/components/Map/WaypointLog"
 import AIReviewSummary from "@/components/Ai/summary.reviews"
 
@@ -44,6 +45,7 @@ export default function WaypointPage() {
     const { id } = useParams()
     const { data: session, status } = useSession()
     const [waypoint, setWaypoint] = useState<Waypoint | null>(null)
+    const [notFound, setNotFound] = useState(false)
     const [waypointLogs, setWaypointLogs] = useState<WaypointLog[]>([])
     const [reviews, setReviews] = useState<Review[]>([])
     const [avgRating, setAvgRating] = useState(0)
@@ -76,7 +78,20 @@ export default function WaypointPage() {
         async function fetchWaypoint() {
             try {
                 const res = await fetch(`/api/waypoints/${id}`)
+                if (!res.ok) {
+                    // If API returns 404, mark notFound so we can render the 404 UI
+                    if (res.status === 404) {
+                        setNotFound(true)
+                        return
+                    }
+                    const e = await res.json().catch(() => ({}))
+                    throw new Error(e?.error || `Failed to fetch waypoint (${res.status})`)
+                }
                 const data = await res.json()
+                if (!data?.waypoint) {
+                    setNotFound(true)
+                    return
+                }
                 setWaypoint(data.waypoint)
                 setWaypointLogs(data.logs || [])
                 setReviews(data.waypoint?.reviews || [])
@@ -339,6 +354,8 @@ export default function WaypointPage() {
         if (!uid) return null
         return reviews.find(r => r.user.id === uid) || null
     }, [reviews, session])
+
+    if (notFound) return <NotFound />
 
     if (!waypoint) return <p className="text-center mt-20">Loading...</p>
 
