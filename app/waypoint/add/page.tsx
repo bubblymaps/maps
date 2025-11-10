@@ -7,6 +7,7 @@ import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 export default function AddWaypointPage() {
   const { theme } = useTheme()
@@ -21,6 +22,8 @@ export default function AddWaypointPage() {
   const [maintainer, setMaintainer] = useState("")
   const [imageUrl, setImageUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   const [lat, setLat] = useState<number | null>(null)
   const [lng, setLng] = useState<number | null>(null)
@@ -487,7 +490,8 @@ export default function AddWaypointPage() {
                       <div className="text-xs text-muted-foreground mt-1">
                         • Ensure the location is accurate and precise<br/>
                         • The bubbler will be reviewed before appearing on the map<br/>
-                        • You'll be redirected to the bubbler page after submission
+                        • You'll be redirected to the bubbler page after submission <br />
+                        • By submitting, you agree to our <a href="/terms" className="underline">terms of service</a> and <a href="/privacy" className="underline">privacy policy</a>.
                       </div>
                     </div>
                   </div>
@@ -521,9 +525,10 @@ export default function AddWaypointPage() {
                 </>
               )}
               {step === 3 && (
+                <>
                 <button 
                   className="px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
-                  onClick={handleSubmit}
+                  onClick={() => setConfirmOpen(true)}
                   disabled={!name || lat == null || lng == null || isSubmitting}
                 >
                   {isSubmitting ? (
@@ -536,6 +541,30 @@ export default function AddWaypointPage() {
                     </>
                   )}
                 </button>
+
+                <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogDescription>
+                      By submitting this bubbler you confirm the details are accurate. By continuing you agree to posting this entry and accept our <a href="/terms" className="underline">terms of service</a>.
+                    </AlertDialogDescription>
+
+                    <div className="mt-4 flex items-start gap-2">
+                      <input id="agree" type="checkbox" checked={agreeToTerms} onChange={(e) => setAgreeToTerms(e.target.checked)} className="mt-1" />
+                      <label htmlFor="agree" className="text-sm">I agree to posting and the <a href="/terms" className="underline">terms of service</a>.</label>
+                    </div>
+
+                    <AlertDialogFooter className="mt-4">
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => { setConfirmOpen(false); handleSubmit(); }} disabled={!agreeToTerms || isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : 'Confirm & Post'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                </>
               )}
             </div>
           </div>
