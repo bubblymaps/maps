@@ -11,6 +11,7 @@ import {
     BookOpenText,
     LifeBuoy,
     FileText,
+    Home
 } from "lucide-react"
 
 import {
@@ -82,7 +83,14 @@ export function AvatarManager() {
                     onClick={() => router.push(`/profile/${session?.user.handle}`)}
                 >
                     <User className="mr-2 h-4 w-4" />
-                    Your Profile
+                    My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/home`)}
+                >
+                    <Home className="mr-2 h-4 w-4" />
+                    Home Page
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

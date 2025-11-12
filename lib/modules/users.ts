@@ -145,6 +145,69 @@ export class Users {
     }
   }
 
+  static async getByEmail(email: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+      return user;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue fetching this user");
+    }
+  }
+
+  static async removeBio(id: string) {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { bio: '[ Content Deleted ]' },
+      });
+      return updatedUser;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue removing the bio");
+    }
+  }
+
+  static async removeImage(id: string) {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { image: '[ Content Deleted ]' },
+      });
+      return updatedUser;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue removing the image");
+    }
+  }
+
+  static async removeHandle(id: string) {
+    try {
+      let newHandle: string;
+      let exists = true;
+
+      while (exists) {
+        const randomNum = Math.floor(Math.random() * 1_000_000_000);
+        newHandle = `[ Content Deleted ${randomNum} ]`;
+
+        const existingUser = await prisma.user.findUnique({
+          where: { handle: newHandle },
+        });
+
+        exists = !!existingUser;
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { handle: newHandle! },
+      });
+
+      return updatedUser;
+    } catch (err: any) {
+      throw new Error(err.message || "There was an issue removing the handle");
+    }
+  }
+
+
   static async getUserByUsername(handle: string) { // legacy function for profiles
     return prisma.user.findUnique({
       where: { handle },
