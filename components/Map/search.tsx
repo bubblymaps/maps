@@ -114,7 +114,7 @@ export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }
   const abortRef = useRef<AbortController | null>(null)
   const debounceRef = useRef<number | null>(null)
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const inputEl = useRef<HTMLInputElement | null>(null)
+  const inputEl = useRef<HTMLInputElement>(null!);
   const suppressRef = useRef(false)
 
   useEffect(() => {
