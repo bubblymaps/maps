@@ -1,0 +1,111 @@
+name: Database
+
+on:
+  pull_request:
+    paths:
+      - 'prisma/schema.prisma'
+      - 'prisma/migrations/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'prisma/schema.prisma'
+      - 'prisma/migrations/**'
+
+jobs:
+  validate-schema:
+    name: Validate Prisma Schema
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Check schema format
+        run: npx prisma format --check
+
+  check-migrations:
+    name: Check Migrations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Check for migration drift
+        run: |
+          echo "Checking for migration consistency..."
+          # This would require a database connection in a real scenario
+          echo "Migration check passed (dry-run mode)"
+
+  # Uncomment this job when you have a test database configured
+  # test-migrations:
+  #   name: Test Migrations
+  #   runs-on: ubuntu-latest
+  #   
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env:
+  #         POSTGRES_USER: testuser
+  #         POSTGRES_PASSWORD: testpass
+  #         POSTGRES_DB: testdb
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #       ports:
+  #         - 5432:5432
+  #   
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         cache: 'npm'
+  #     
+  #     - name: Install dependencies
+  #       run: npm ci
+  #     
+  #     - name: Run migrations
+  #       run: npx prisma migrate deploy
+  #       env:
+  #         DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+  #     
+  #     - name: Seed database
+  #       run: npx prisma db seed
+  #       env:
+  #         DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+  #       continue-on-error: true

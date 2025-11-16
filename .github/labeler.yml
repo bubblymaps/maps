@@ -1,0 +1,42 @@
+# Configuration for actions/labeler
+# Labels PRs based on changed files
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file: ['package*.json', 'package-lock.json']
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md', 'docs/**/*']
+
+'frontend':
+  - changed-files:
+    - any-glob-to-any-file: ['app/**/*', 'components/**/*', 'public/**/*']
+
+'backend':
+  - changed-files:
+    - any-glob-to-any-file: ['app/api/**/*', 'lib/**/*']
+
+'database':
+  - changed-files:
+    - any-glob-to-any-file: ['prisma/**/*']
+
+'docker':
+  - changed-files:
+    - any-glob-to-any-file: ['Dockerfile', 'docker-compose.yml', '.dockerignore']
+
+'ci/cd':
+  - changed-files:
+    - any-glob-to-any-file: ['.github/**/*']
+
+'styles':
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.css', 'postcss.config.*', 'tailwind.config.*']
+
+'typescript':
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.ts', '**/*.tsx', 'tsconfig.json']
+
+'configuration':
+  - changed-files:
+    - any-glob-to-any-file: ['*.config.*', '.env*', '*.json']
