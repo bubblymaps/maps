@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
   return (
     <div className="min-h-screen ">
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-                  <Header />
+        <Header />
         <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
           <div className="h-32 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
           <div className="px-6 pb-6 -mt-16">
@@ -88,20 +88,18 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
               <div className="p-4 rounded-lg bg-card border shadow-sm mb-6">
                 <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Bio</h2>
                 <p className="text-foreground leading-relaxed whitespace-pre-line">
-                  {user.bio.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-                    /^https?:\/\//.test(part) ? (
-                      <Link
-                        key={i}
-                        href={part}
-                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2"
-                        target="_blank"
-                      >
-                        {part}
-                      </Link>
-                    ) : (
-                      part
-                    )
-                  )}
+                  {user.bio
+                    ?.split(/(https?:\/\/[^\s]+)/g)
+                    .map((part: string, i: number) =>
+                      /^https?:\/\//.test(part) ? (
+                        <Link key={i} href={part} className="text-blue-500 underline">
+                          {part}
+                        </Link>
+                      ) : (
+                        <span key={i}>{part}</span>
+                      )
+                    )}
+
                 </p>
               </div>
             )}

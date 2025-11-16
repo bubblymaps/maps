@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing type parameter" }, { status: 400 });
 
     const reports = await ReportAbuse.all();
-    const filtered = reports.filter((r) => r.type === type);
+    const filtered = reports.filter((r: { type: string }) => r.type === type);
 
     return NextResponse.json(filtered);
   } catch (err: any) {

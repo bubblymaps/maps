@@ -42,6 +42,34 @@ function formatDate(d: Date) {
   }
 }
 
+type ContribUser = {
+  id: string
+  name: string | null
+  displayName: string | null
+  handle: string | null
+  image: string | null
+  verified: boolean
+}
+
+interface AddedBy {
+  id: string
+  name: string | null
+  displayName: string | null
+  handle: string | null
+  image: string | null
+  verified: boolean
+}
+
+interface RecentBubbler {
+  id: number
+  name: string | null
+  region: string | null
+  createdAt: Date | string
+  verified: boolean
+  addedBy: AddedBy | null
+  _count: { reviews: number }
+}
+
 export default async function WaypointsPage() {
   // Fetch hub data in parallel
   const [recentBubblers, recentReviews, topRegions, contribData] =
@@ -92,12 +120,12 @@ export default async function WaypointsPage() {
         },
       }),
       prisma.bubbler.groupBy({
-        by: ["region"],
-        where: { region: { not: null } },
-        _count: { region: true },
-        orderBy: { _count: { region: "desc" } },
-        take: 5,
-      }),
+  by: ["region"],
+  where: { region: { not: null } },
+  _count: { region: true },
+  orderBy: { _count: { region: "desc" } },
+  take: 5,
+}) as unknown as { region: string | null; _count: { region: number } }[],
       (async () => {
         const [reviewGroups, bubblerGroups] = await Promise.all([
           prisma.review.groupBy({
@@ -139,7 +167,7 @@ export default async function WaypointsPage() {
             total: number
           }[]
 
-        const users = await prisma.user.findMany({
+        const users: ContribUser[] = await prisma.user.findMany({
           where: { id: { in: topIds } },
           select: {
             id: true,
@@ -152,7 +180,10 @@ export default async function WaypointsPage() {
         })
 
         // Preserve order by totals
-        const usersById = new Map(users.map((u) => [u.id, u]))
+        const usersById = new Map<string, ContribUser>(
+          users.map((u) => [u.id, u])
+        )
+
         return topIds
           .map((id) => ({ user: usersById.get(id)!, total: totals.get(id)! }))
           .filter((x) => !!x.user)
@@ -167,146 +198,166 @@ export default async function WaypointsPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-        {/* Recently added waypoints */}
-        <Card>
-          <CardHeader>
+          {/* Recently added waypoints */}
+          <Card>
+            <CardHeader>
               <CardTitle>Recently added waypoints</CardTitle>
               <CardDescription>Newest submissions across the map</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Waypoint</TableHead>
-                    <TableHead>Region</TableHead>
-                  <TableHead>Reviews</TableHead>
-                  <TableHead>Added</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentBubblers.length === 0 ? (
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4}>
-                      <Empty>
-                        <EmptyHeader>
-                          <EmptyTitle>No waypoints yet</EmptyTitle>
-                          <EmptyDescription>
-                            Be the first to add a waypoint and help the community grow.
-                          </EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    </TableCell>
+                    <TableHead>Waypoint</TableHead>
+                    <TableHead>Region</TableHead>
+                    <TableHead>Reviews</TableHead>
+                    <TableHead>Added</TableHead>
                   </TableRow>
-                ) : (
-                  recentBubblers.map((b) => (
-                    <TableRow key={b.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/waypoint/${b.id}`}
-                            className="font-medium hover:underline truncate max-w-[20ch] inline-flex"
-                          >
-                            {b.name}
-                          </Link>
-                          {b.verified && <Badge>Verified</Badge>}
-                        </div>
-                        {b.addedBy && (
-                          <div className="text-muted-foreground text-xs">
-                            by {b.addedBy.displayName || b.addedBy.name || "User"}
-                          </div>
-                        )}
+                </TableHeader>
+                <TableBody>
+                  {recentBubblers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <Empty>
+                          <EmptyHeader>
+                            <EmptyTitle>No waypoints yet</EmptyTitle>
+                            <EmptyDescription>
+                              Be the first to add a waypoint and help the community grow.
+                            </EmptyDescription>
+                          </EmptyHeader>
+                        </Empty>
                       </TableCell>
-                      <TableCell className="truncate max-w-[16ch]">
-                        {b.region ?? "—"}
-                      </TableCell>
-                      <TableCell>{b._count.reviews}</TableCell>
-                      <TableCell>{formatDate(new Date(b.createdAt))}</TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                  ) : (
+                    recentBubblers.map((b: RecentBubbler) => (
+                      <TableRow key={b.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/waypoint/${b.id}`}
+                              className="font-medium hover:underline truncate max-w-[20ch] inline-flex"
+                            >
+                              {b.name}
+                            </Link>
+                            {b.verified && <Badge>Verified</Badge>}
+                          </div>
+                          {b.addedBy && (
+                            <div className="text-muted-foreground text-xs">
+                              by {b.addedBy.displayName || b.addedBy.name || "User"}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="truncate max-w-[16ch]">
+                          {b.region ?? "—"}
+                        </TableCell>
+                        <TableCell>{b._count.reviews}</TableCell>
+                        <TableCell>{formatDate(new Date(b.createdAt))}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
 
-        {/* Recent reviews */}
-        <Card>
-          <CardHeader>
+          {/* Recent reviews */}
+          <Card>
+            <CardHeader>
               <CardTitle>Recent reviews</CardTitle>
               <CardDescription>What the community is saying</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Waypoint</TableHead>
-                    <TableHead>Rating</TableHead>
-                  <TableHead>When</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentReviews.length === 0 ? (
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4}>
-                      <Empty>
-                        <EmptyHeader>
-                          <EmptyTitle>No reviews yet</EmptyTitle>
-                          <EmptyDescription>
-                            Share your experience at a waypoint to kick things off.
-                          </EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    </TableCell>
+                    <TableHead>User</TableHead>
+                    <TableHead>Waypoint</TableHead>
+                    <TableHead>Rating</TableHead>
+                    <TableHead>When</TableHead>
                   </TableRow>
-                ) : (
-                  recentReviews.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar>
-                            <AvatarImage src={r.user?.image ?? undefined} />
-                            <AvatarFallback>
-                              {initials(r.user?.displayName || r.user?.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <Link
-                              href={`/profile/${r.user?.handle ?? r.user?.id}`}
-                              className="font-medium hover:underline"
-                            >
-                              {r.user?.displayName || r.user?.name || "User"}
-                            </Link>
-                            {r.user?.handle && (
-                              <span className="text-muted-foreground text-xs">
-                                @{r.user.handle}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {recentReviews.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <Empty>
+                          <EmptyHeader>
+                            <EmptyTitle>No reviews yet</EmptyTitle>
+                            <EmptyDescription>
+                              Share your experience at a waypoint to kick things off.
+                            </EmptyDescription>
+                          </EmptyHeader>
+                        </Empty>
                       </TableCell>
-                      <TableCell>
-                        <Link
-                          href={`/waypoint/${r.bubbler.id}`}
-                          className="hover:underline truncate max-w-[24ch] inline-flex"
-                        >
-                          {r.bubbler.name}
-                        </Link>
-                        {r.bubbler.region && (
-                          <div className="text-muted-foreground text-xs">
-                            {r.bubbler.region}
-                          </div>
-                        )}
-                      </TableCell>
-                        <TableCell>{r.rating.toFixed(1)}</TableCell>
-                      <TableCell>{formatDate(new Date(r.createdAt))}</TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                  ) : (
+                    recentReviews.map(
+                      (r: {
+                        id: number
+                        rating: number
+                        comment: string | null
+                        createdAt: Date
+                        user: {
+                          id: string
+                          name: string | null
+                          displayName: string | null
+                          handle: string | null
+                          image: string | null
+                          verified: boolean
+                        }
+                        bubbler: {
+                          id: number
+                          name: string | null
+                          region: string | null
+                        }
+                      }) => (
+                        <TableRow key={r.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Avatar>
+                                <AvatarImage src={r.user?.image ?? undefined} />
+                                <AvatarFallback>
+                                  {initials(r.user?.displayName || r.user?.name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <Link
+                                  href={`/profile/${r.user?.handle ?? r.user?.id}`}
+                                  className="font-medium hover:underline"
+                                >
+                                  {r.user?.displayName || r.user?.name || "User"}
+                                </Link>
+                                {r.user?.handle && (
+                                  <span className="text-muted-foreground text-xs">
+                                    @{r.user.handle}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/waypoint/${r.bubbler.id}`}
+                              className="hover:underline truncate max-w-[24ch] inline-flex"
+                            >
+                              {r.bubbler.name}
+                            </Link>
+                            {r.bubbler.region && (
+                              <div className="text-muted-foreground text-xs">
+                                {r.bubbler.region}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{r.rating.toFixed(1)}</TableCell>
+                          <TableCell>{formatDate(new Date(r.createdAt))}</TableCell>
+                        </TableRow>
+                      )
+                    )
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar */}
@@ -378,7 +429,7 @@ export default async function WaypointsPage() {
                 </Empty>
               ) : (
                 <ul className="flex flex-col divide-y">
-                  {topRegions.map((r) => (
+                  {topRegions.map((r: { region: string | null; _count: { region: number } }) => (
                     <li key={r.region ?? "__null__"} className="flex items-center justify-between py-2">
                       <span className="truncate max-w-[24ch]">{r.region ?? "Unknown"}</span>
                       <Badge variant="outline" className="ml-2">{r._count.region}</Badge>

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
+import type { User } from "@/types/users";
+
 export interface UserData {
   name?: string;
   displayName?: string;
@@ -31,7 +33,7 @@ export class Users {
     }
   }
 
-  static async all() {
+  static async all(): Promise<User[]> {
     try {
       const users = await prisma.user.findMany();
       return users;
