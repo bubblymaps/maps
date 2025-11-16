@@ -79,11 +79,12 @@ Your PR will automatically get labels like:
 ### Setting Up Deployment
 
 1. Edit `.github/workflows/deploy.yml`
-2. Uncomment your deployment platform section
+2. Uncomment the `deploy-docker` job section
 3. Add required secrets to GitHub Settings > Secrets:
-   - For Vercel: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
-   - For AWS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-   - For Docker: `HOST`, `USERNAME`, `SSH_KEY`
+   - `HOST` - Server hostname or IP
+   - `USERNAME` - SSH username
+   - `SSH_KEY` - Private SSH key for authentication
+4. Update the deployment script path to match your server setup
 
 ### Enabling Branch Protection
 

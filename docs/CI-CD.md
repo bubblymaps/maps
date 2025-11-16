@@ -72,9 +72,9 @@ The project uses GitHub Actions for automated testing, building, security scanni
 
 **Trigger:** Push to `main` branch (manual trigger also available)
 
-**Status:** Template - needs configuration for your deployment target
+**Status:** Template - needs configuration for Docker deployment
 
-**Usage:** Uncomment and configure for your specific deployment platform (Vercel, AWS, Docker, etc.)
+**Usage:** Uncomment and configure for your Docker deployment needs
 
 ## Configuration Files
 
@@ -103,10 +103,10 @@ The CI workflows use test environment variables. For production deployment, conf
 - `GITHUB_TOKEN` - Used for pushing to GitHub Container Registry (automatically provided)
 
 ### Required for Deployment (configure in GitHub Secrets):
-Depending on your deployment target, you may need:
-- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` (for Vercel)
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (for AWS)
-- `HOST`, `USERNAME`, `SSH_KEY` (for Docker deployment)
+For Docker deployment, you need:
+- `HOST` - Server hostname or IP address
+- `USERNAME` - SSH username for server access
+- `SSH_KEY` - Private SSH key for authentication
 
 ## Setting Up CI/CD
 
@@ -124,10 +124,10 @@ Recommended branch protection rules for `main`:
 - Include administrators
 
 ### 3. Configure Deployment
-To enable deployment:
-1. Choose your deployment platform
-2. Uncomment the relevant section in `deploy.yml`
-3. Add required secrets to GitHub repository settings
+To enable Docker deployment:
+1. Uncomment the `deploy-docker` job in `deploy.yml`
+2. Add required secrets to GitHub repository settings (HOST, USERNAME, SSH_KEY)
+3. Update the deployment script path in the workflow
 4. Test the deployment workflow
 
 ### 4. Monitor Workflows
