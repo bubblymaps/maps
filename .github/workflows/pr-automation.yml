@@ -75,6 +75,9 @@ jobs:
     name: PR Title and Description Check
     runs-on: ubuntu-latest
     if: github.event.action == 'opened' || github.event.action == 'edited'
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Check PR title
