@@ -1,0 +1,26 @@
+# Folders
+.git
+.github
+.vscode
+node_modules
+.next
+out
+build
+
+# Env and local files
+.env
+.env.*
+*.pem
+*.log
+
+# Misc
+Dockerfile*
+docker-compose*.yml
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+.pnp
+.pnp.*
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

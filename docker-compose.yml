@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    image: bubblymaps/web:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: "production"
+      PORT: "3000"
+      DATABASE_URL: "postgresql://user:pass@host:5432/bubblymaps?schema=public"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "your_secret"
+      GOOGLE_CLIENT_ID: "your_google_client_id"
+      GOOGLE_CLIENT_SECRET: "your_secret"
+      RESEND_API_KEY: "your_resend_api_key"
+      API_TOKEN: "your_api_token"
+      MINIO_USER: "your_minio_user"
+      MINIO_PASSWORD: "your_minio_password"
+      MINIO_URL: "https://s3.yourdomain.com"
+      MINIO_BUCKET: "bucketname"
+
