@@ -21,7 +21,22 @@ export default function AddWaypointPage() {
   const [region, setRegion] = useState("")
   const [maintainer, setMaintainer] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [imageUrlError, setImageUrlError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // imageUrl validation helper
+  function isValidImageUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url)
+      // Accept only http and https schemes
+      if (!["http:", "https:"].includes(parsed.protocol)) return false
+      // Only allow common image file extensions (add as necessary)
+      if (!/\.(jpe?g|png|gif|webp)$/i.test(parsed.pathname)) return false
+      return true
+    } catch {
+      return false
+    }
+  }
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [agreeToTerms, setAgreeToTerms] = useState(false)
 
@@ -320,11 +335,26 @@ export default function AddWaypointPage() {
                       <div className="text-sm font-medium mb-1">Image URL</div>
                       <input 
                         value={imageUrl} 
-                        onChange={(e) => setImageUrl(e.target.value)} 
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val === "") {
+                            setImageUrl(val)
+                            setImageUrlError(null)
+                          } else if (isValidImageUrl(val)) {
+                            setImageUrl(val)
+                            setImageUrlError(null)
+                          } else {
+                            setImageUrl(val)
+                            setImageUrlError("Please enter a valid image URL (http/https, jpg/png/gif/webp).")
+                          }
+                        }} 
                         placeholder="https://example.com/image.jpg"
                         type="url"
-                        className="w-full p-2.5 border rounded-lg bg-background transition" 
+                        className={`w-full p-2.5 border rounded-lg bg-background transition ${imageUrlError ? "border-red-500" : ""}`} 
                       />
+                      {imageUrlError && (
+                        <div className="text-xs text-red-600 mt-1">{imageUrlError}</div>
+                      )}
                       <div className="text-xs text-muted-foreground mt-1">Optional: Direct link to an image of the bubbler</div>
                     </label>
 
@@ -424,7 +454,7 @@ export default function AddWaypointPage() {
                   </div>
 
                   {/* Image Preview */}
-                  {imageUrl && (
+                  {imageUrl && isValidImageUrl(imageUrl) && (
                     <div className="mb-4">
                       <img 
                         src={imageUrl} 
