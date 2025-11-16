@@ -23,7 +23,9 @@ import PointMap from "@/components/Map/point"
 import Header from "@/components/header"
 import NotFound from "@/components/404"
 import { WaypointLogsList } from "@/components/Map/WaypointLog"
-import AIReviewSummary from "@/components/Ai/summary.reviews"
+import AIReviewSummary from "@/components/Ai/summary"
+import { toast } from "sonner"
+import Loading from "@/components/loading"
 
 interface Review {
     id: number
@@ -85,6 +87,8 @@ export default function WaypointPage() {
                         return
                     }
                     const e = await res.json().catch(() => ({}))
+                    console.error("Error fetching waypoint:", e)
+                    toast.error("There was an issue getting waypoint data for this page. Please try again later.")
                     throw new Error(e?.error || `Failed to fetch waypoint (${res.status})`)
                 }
                 const data = await res.json()
@@ -103,10 +107,10 @@ export default function WaypointPage() {
     }, [id])
 
     useEffect(() => {
-  if (waypoint) {
-    console.log("reviews:", waypoint.reviews)
-  }
-}, [waypoint])
+        if (waypoint) {
+            console.log("reviews:", waypoint.reviews)
+        }
+    }, [waypoint])
 
 
     // Update edit data when waypoint changes
@@ -357,7 +361,7 @@ export default function WaypointPage() {
 
     if (notFound) return <NotFound />
 
-    if (!waypoint) return <p className="text-center mt-20">Loading...</p>
+    if (!waypoint) return <Loading />
 
     const amenities: string[] = Array.isArray(waypoint.amenities)
         ? waypoint.amenities
@@ -577,7 +581,7 @@ export default function WaypointPage() {
 
                                 {reviews.length >= 2 && (
                                     <div className="relative group">
-                                       <AIReviewSummary reviews={reviews.filter(r => r.comment).map(r => ({ rating: r.rating, comment: r.comment! }))} />
+                                        <AIReviewSummary reviews={reviews.filter(r => r.comment).map(r => ({ rating: r.rating, comment: r.comment! }))} />
                                     </div>
                                 )}
 

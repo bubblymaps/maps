@@ -208,21 +208,9 @@ export class Users {
   }
 
 
-  static async getUserByUsername(handle: string) { // legacy function for profiles
+  static async getUserByUsername(handle: string) {
     return prisma.user.findUnique({
       where: { handle },
-      select: {
-        id: true,
-        displayName: true,
-        handle: true,
-        bio: true,
-        image: true,
-        verified: true,
-        moderator: true,
-        xp: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
   }
 }

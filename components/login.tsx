@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface LoginCardProps {
   title?: string;
@@ -23,6 +24,18 @@ export default function Login({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = mounted ? resolvedTheme === "dark" : false;
+  // Until the client mounts and theme is resolved, show a neutral spinner to avoid a flash
+  if (!mounted) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="relative w-full max-w-sm p-8 sm:p-10 rounded-3xl shadow-2xl border backdrop-blur-md transition-colors duration-300 space-y-6 bg-background/60 border-border">
+          <div className="flex flex-col items-center gap-4">
+            <Spinner className="size-8 text-muted-foreground" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

@@ -158,15 +158,9 @@ export default async function WaypointsPage() {
     ])
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto space-y-2">
       <Header />
       <header className="space-y-3 pb-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Community hub</h1>
-          <p className="text-muted-foreground text-base max-w-2xl">
-            Discover the latest waypoints, see what the community is saying, and meet our top contributors.
-          </p>
-        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

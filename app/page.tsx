@@ -64,12 +64,6 @@ export default function Page() {
       ? "https://tiles.linus.id.au/styles/dark/style.json"
       : "https://tiles.linus.id.au/styles/light/style.json"
 
-  const handleSearch = (val: string) => {
-    if (!val) return
-    console.log("Searching:", val)
-    toast(`Searching for "${val}"`)
-  }
-
   const handleMapMove = (map: Map) => {
     const center = map.getCenter()
     const zoom = map.getZoom()
@@ -82,52 +76,50 @@ export default function Page() {
 
   const handleSelectWaypoint = (item: Waypoint) => {
     if (!map) return
-    ;(async () => {
-      // close previous popup if present
-      if (currentPopup) {
+      ; (async () => {
+        if (currentPopup) {
+          try {
+            currentPopup.remove()
+          } catch (e) {
+            console.error("Failed to remove existing popup:", e)
+          }
+          setCurrentPopup(null)
+        }
+
+        let full: any = item
         try {
-          currentPopup.remove()
+          const res = await fetch(`/api/waypoints/${item.id}`)
+          if (res.ok) {
+            const body = await res.json()
+            if (body && body.waypoint) full = body.waypoint
+          }
         } catch (e) {
-          // ignore
+          console.error("Failed to fetch waypoint details:", e)
         }
-        setCurrentPopup(null)
-      }
 
-      // Fetch full waypoint details from API to ensure popup shows same data as clicking a point
-      let full: any = item
-      try {
-        const res = await fetch(`/api/waypoints/${item.id}`)
-        if (res.ok) {
-          const body = await res.json()
-          if (body && body.waypoint) full = body.waypoint
+        const coords: [number, number] = [full.longitude ?? item.longitude, full.latitude ?? item.latitude]
+        map.easeTo({ center: coords, zoom: 14, duration: 700 })
+
+        const popupNode = document.createElement("div")
+        ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={full} />)
+
+        const popup = new maplibregl.Popup({
+          offset: 10,
+          closeOnClick: true,
+        })
+          .setLngLat(coords)
+          .setDOMContent(popupNode)
+          .addTo(map)
+
+        const handleClose = () => {
+          setCurrentPopup(null)
         }
-      } catch (e) {
-        // ignore and fall back to provided item
-      }
 
-      const coords: [number, number] = [full.longitude ?? item.longitude, full.latitude ?? item.latitude]
-      map.easeTo({ center: coords, zoom: 14, duration: 700 })
+        popup.on("close", handleClose)
+          ; (popup as any)._closeHandler = handleClose
 
-      const popupNode = document.createElement("div")
-      ReactDOM.createRoot(popupNode).render(<WaypointPopup waypoint={full} />)
-
-      const popup = new maplibregl.Popup({
-        offset: 10,
-        closeOnClick: true,
-      })
-        .setLngLat(coords)
-        .setDOMContent(popupNode)
-        .addTo(map)
-
-      const handleClose = () => {
-        setCurrentPopup(null)
-      }
-
-      popup.on("close", handleClose)
-      ;(popup as any)._closeHandler = handleClose
-
-      setCurrentPopup(popup)
-    })()
+        setCurrentPopup(popup)
+      })()
   }
 
   useEffect(() => {
@@ -287,14 +279,6 @@ export default function Page() {
 
   return (
     <div className="w-screen h-screen relative overflow-hidden">
-      {status !== "authenticated" && (
-        <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
-          {/* Header has its own interactive elements; allow clicks */}
-          <div className="pointer-events-auto">
-            <Header />
-          </div>
-        </div>
-      )}
       <MapBox
         styleURL={styleURL}
         center={initialCenter}
@@ -307,18 +291,23 @@ export default function Page() {
         }}
       />
 
-      <div className={"fixed z-40 flex flex-row items-center gap-2 left-4 right-4 " + (status !== "authenticated" ? "top-24" : "top-4")}>
+      <div className={"fixed z-40 flex flex-row items-center gap-2 left-4 right-4 top-4"}>
         <div className="flex-1 min-w-0 sm:max-w-md">
           <WaypointSearch placeholder="Search waypoints..." onSelect={handleSelectWaypoint} />
         </div>
 
-        {status === "authenticated" && (
-          <div className="flex flex-row gap-2 shrink-0 ml-auto">
+        <div className="flex flex-row gap-2 shrink-0 ml-auto">
+          {status === "authenticated" && 
             <AvatarManager />
-            <ThemeToggle />
-          </div>
-        )}
-      </div>
+          }
+
+          {status !== "authenticated" &&
+            <LoginBtn onClick={() => setShowLogin(true)} />
+          }
+
+          <ThemeToggle />
+        </div>
+      </div> 
 
       <Watermark />
       <Attribution />
@@ -328,15 +317,14 @@ export default function Page() {
 
       {showLogin && (
         <>
-          {/* Overlay */}
           <div
             className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-fadeIn transition-opacity"
             onClick={() => setShowLogin(false)}
           />
-          {/* Login modal */}
           <Login onClose={() => setShowLogin(false)} />
         </>
       )}
+
     </div>
   )
 }

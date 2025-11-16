@@ -107,14 +107,14 @@ export function AvatarManager() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("https://bubblymaps.org/privacy")}
+                    onClick={() => router.push("/privacy")}
                 >
                     <FileText className="mr-2 h-4 w-4" />
                     Privacy Policy
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => router.push("https://bubblymaps.org/terms")}
+                    onClick={() => router.push("/terms")}
                 >
                     <FileText className="mr-2 h-4 w-4" />
                     Terms and Conditions
@@ -135,20 +135,6 @@ export function AvatarManager() {
                         />
                     </svg>
                     Github
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => router.push("https://docs.bubblymaps.org")}
-                >
-                    <BookOpenText className="mr-2 h-4 w-4" />
-                    Documentation
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => router.push("https://bubblymaps.org/support")}
-                >
-                    <LifeBuoy className="mr-2 h-4 w-4" />
-                    Support
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
