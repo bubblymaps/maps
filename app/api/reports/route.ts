@@ -15,8 +15,9 @@ export async function GET(req: NextRequest) {
     const filtered = reports.filter((r: { type: string }) => r.type === type);
 
     return NextResponse.json(filtered);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch reports";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -42,7 +43,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(report, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to create report";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

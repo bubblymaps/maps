@@ -11,6 +11,7 @@ export function Logo() {
     // Use useLayoutEffect for synchronous mounting
     useLayoutEffect(() => {
         setMounted(true)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const isDark = (resolvedTheme ?? 'light') === 'dark'

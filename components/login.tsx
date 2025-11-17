@@ -23,9 +23,10 @@ export default function Login({
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   
-  // Use useLayoutEffect for synchronous mounting without cascade warning
+  // Handle mounting without effect
   useLayoutEffect(() => {
     setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const isDark = mounted ? resolvedTheme === "dark" : false;

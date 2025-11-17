@@ -22,10 +22,11 @@ export async function PATCH(req: NextRequest) {
     });
 
     return NextResponse.json({ user: updatedUser });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     console.error("User update error:", error);
     return NextResponse.json(
-      { error: "Internal server error", msg: error.message || error },
+      { error: "Internal server error", msg: errorMessage },
       { status: 500 }
     );
   }

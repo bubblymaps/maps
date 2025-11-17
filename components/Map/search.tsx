@@ -38,30 +38,25 @@ export function SearchBar({
   className,
 }: SearchBarProps) {
   // Support both controlled and uncontrolled usage.
+  // Use a ref to track if we're in controlled mode
+  const isControlled = value !== undefined
   const [internal, setInternal] = useState(value ?? "")
-
-  // Sync internal state with controlled value using useRef to avoid cascading updates
-  const prevValueRef = useRef(value)
-  useEffect(() => {
-    // Only update if value changed externally (not from our own input)
-    if (value !== undefined && value !== prevValueRef.current) {
-      setInternal(value)
-      prevValueRef.current = value
-    }
-  }, [value])
+  
+  // In controlled mode, always use the external value
+  const displayValue = isControlled ? value : internal
 
   const handleInputChange = (val: string) => {
-    if (value === undefined) setInternal(val)
+    if (!isControlled) setInternal(val)
     onChange?.(val)
   }
 
   const handleClear = () => {
-    if (value === undefined) setInternal("")
+    if (!isControlled) setInternal("")
     onChange?.("")
   }
 
   const handleSearch = () => {
-    onSearch?.(value ?? internal)
+    onSearch?.(displayValue)
   }
 
   const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -90,7 +85,7 @@ export function SearchBar({
       <input
         type="text"
         placeholder={placeholder}
-        value={value ?? internal}
+        value={displayValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleLocalKeyDown}
         ref={inputRef}
@@ -104,7 +99,7 @@ export function SearchBar({
         aria-label="Clear search"
         className={cn(
           "mr-3 text-muted-foreground hover:text-foreground transition-opacity cursor-pointer",
-          (value ?? internal) ? "opacity-100" : "opacity-0 pointer-events-none",
+          displayValue ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
       >
         <X className="h-4 w-4" />
