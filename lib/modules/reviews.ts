@@ -21,8 +21,9 @@ export class Reviews {
         },
       });
       return newReview;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue adding this review");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue adding this review";
+      throw new Error(errorMessage);
     }
   }
 
@@ -36,8 +37,9 @@ export class Reviews {
         orderBy: { createdAt: "desc" },
       });
       return reviews;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching reviews");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching reviews";
+      throw new Error(errorMessage);
     }
   }
 
@@ -47,8 +49,9 @@ export class Reviews {
         where: { id },
       });
       return deletedReview;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue deleting this review");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue deleting this review";
+      throw new Error(errorMessage);
     }
   }
 
@@ -62,8 +65,9 @@ export class Reviews {
         orderBy: { createdAt: "desc" },
       });
       return reviews;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching reviews");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching reviews";
+      throw new Error(errorMessage);
     }
   }
 
@@ -77,8 +81,9 @@ export class Reviews {
         orderBy: { createdAt: "desc" },
       });
       return reviews;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching user reviews");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching user reviews";
+      throw new Error(errorMessage);
     }
   }
 
@@ -88,8 +93,9 @@ export class Reviews {
         where: { id },
       });
       return review;
-    } catch (err: any) {
-      throw new Error(err.message || "Failed to fetch review");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch review";
+      throw new Error(errorMessage);
     }
   }
 }

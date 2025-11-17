@@ -19,6 +19,15 @@ interface SearchBarProps {
   className?: string
 }
 
+interface WaypointSearchResult {
+  id: number
+  name: string
+  latitude: number
+  longitude: number
+  verified: boolean
+  approved: boolean
+}
+
 export function SearchBar({
   placeholder = "Search...",
   value,
@@ -31,9 +40,14 @@ export function SearchBar({
   // Support both controlled and uncontrolled usage.
   const [internal, setInternal] = useState(value ?? "")
 
+  // Sync internal state with controlled value using useRef to avoid cascading updates
+  const prevValueRef = useRef(value)
   useEffect(() => {
-    // Keep internal state in sync when used as controlled
-    if (value !== undefined) setInternal(value)
+    // Only update if value changed externally (not from our own input)
+    if (value !== undefined && value !== prevValueRef.current) {
+      setInternal(value)
+      prevValueRef.current = value
+    }
   }, [value])
 
   const handleInputChange = (val: string) => {
@@ -79,7 +93,7 @@ export function SearchBar({
         value={value ?? internal}
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleLocalKeyDown}
-        ref={inputRef as any}
+        ref={inputRef}
         className="flex-1 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground truncate"
       />
 
@@ -100,13 +114,13 @@ export function SearchBar({
 }
 
 interface WaypointSearchProps {
-  onSelect?: (item: any) => void
+  onSelect?: (item: WaypointSearchResult) => void
   placeholder?: string
 }
 
 export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }: WaypointSearchProps) {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Array<any>>([])
+  const [results, setResults] = useState<WaypointSearchResult[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [loading, setLoading] = useState(false)
@@ -157,7 +171,7 @@ export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }
         setOpen(true)
         setActiveIndex(-1)
       } catch (err) {
-        if ((err as any).name === 'AbortError') return
+        if (err instanceof Error && err.name === 'AbortError') return
         console.error(err)
         setResults([])
         setOpen(true)
@@ -172,7 +186,7 @@ export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }
     }
   }, [query])
 
-  const handleSelect = (item: any) => {
+  const handleSelect = (item: WaypointSearchResult) => {
     // Fill input with selection but suppress re-query opening
     setQuery(item.name)
     setOpen(false)

@@ -14,8 +14,9 @@ export class ReportAbuse {
         data,
       });
       return newReport;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue creating the abuse report");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue creating the abuse report";
+      throw new Error(errorMessage);
     }
   }
 
@@ -26,8 +27,9 @@ export class ReportAbuse {
         data: { resolved: true },
       });
       return resolvedReport;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue resolving the abuse report");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue resolving the abuse report";
+      throw new Error(errorMessage);
     }
   }
 
@@ -37,8 +39,9 @@ export class ReportAbuse {
         where: { resolved: false },
         orderBy: { createdAt: "desc" },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching abuse reports");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching abuse reports";
+      throw new Error(errorMessage);
     }
   }
 
@@ -48,8 +51,9 @@ export class ReportAbuse {
         where: { id },
       });
     }
-    catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching the abuse report");
+    catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching the abuse report";
+      throw new Error(errorMessage);
     }
   }
 
@@ -59,8 +63,9 @@ export class ReportAbuse {
         where: { targetId },
         orderBy: { createdAt: "desc" },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching abuse reports");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching abuse reports";
+      throw new Error(errorMessage);
     }
   }
 
@@ -69,8 +74,9 @@ export class ReportAbuse {
       return await prisma.reportAbuse.findMany({
         orderBy: { createdAt: "desc" },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching abuse reports");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching abuse reports";
+      throw new Error(errorMessage);
     }
   }
 
@@ -80,8 +86,9 @@ export class ReportAbuse {
         where: { id },
       });
       return deletedReport;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue deleting the abuse report");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue deleting the abuse report";
+      throw new Error(errorMessage);
     }
   }
 
@@ -91,8 +98,9 @@ export class ReportAbuse {
         where: { resolved: true },
         orderBy: { createdAt: "desc" },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching abuse reports");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching abuse reports";
+      throw new Error(errorMessage);
     }
   }
 }

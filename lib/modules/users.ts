@@ -28,8 +28,9 @@ export class Users {
         data,
       });
       return newUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue creating this user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue creating this user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -37,8 +38,9 @@ export class Users {
     try {
       const users = await prisma.user.findMany();
       return users;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching users");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching users";
+      throw new Error(errorMessage);
     }
   }
 
@@ -48,8 +50,9 @@ export class Users {
         where: { id },
       });
       return deletedUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue deleting this user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue deleting this user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -76,8 +79,9 @@ export class Users {
       });
 
       return updatedUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue updating this user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue updating this user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -87,8 +91,9 @@ export class Users {
         where: { id: userId },
         data: { verified: true },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "Could not verify user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Could not verify user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -98,8 +103,9 @@ export class Users {
         where: { id: userId },
         data: { verified: false },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "Could not unverify user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Could not unverify user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -109,8 +115,9 @@ export class Users {
         where: { id: userId },
         data: { moderator: true },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "Could not give moderator rights");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Could not give moderator rights";
+      throw new Error(errorMessage);
     }
   }
 
@@ -120,8 +127,9 @@ export class Users {
         where: { id: userId },
         data: { moderator: false },
       });
-    } catch (err: any) {
-      throw new Error(err.message || "Could not remove moderator rights");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Could not remove moderator rights";
+      throw new Error(errorMessage);
     }
   }
 
@@ -142,8 +150,9 @@ export class Users {
       });
       if (!user) throw new Error("User not found");
       return user;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching this user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching this user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -153,8 +162,9 @@ export class Users {
         where: { email },
       });
       return user;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue fetching this user");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue fetching this user";
+      throw new Error(errorMessage);
     }
   }
 
@@ -165,8 +175,9 @@ export class Users {
         data: { bio: '[ Content Deleted ]' },
       });
       return updatedUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue removing the bio");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue removing the bio";
+      throw new Error(errorMessage);
     }
   }
 
@@ -177,8 +188,9 @@ export class Users {
         data: { image: '[ Content Deleted ]' },
       });
       return updatedUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue removing the image");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue removing the image";
+      throw new Error(errorMessage);
     }
   }
 
@@ -204,8 +216,9 @@ export class Users {
       });
 
       return updatedUser;
-    } catch (err: any) {
-      throw new Error(err.message || "There was an issue removing the handle");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "There was an issue removing the handle";
+      throw new Error(errorMessage);
     }
   }
 

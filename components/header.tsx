@@ -15,19 +15,14 @@ import { ThemeToggle } from "@/components/themeToggle"
 import { AvatarManager } from "@/components/account"
 import { useSession } from "next-auth/react"
 
-export default function Header() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-
-  const items: Array<{ href: string; label: string; auth?: boolean }> = [
-    { href: "/home", label: "Home" },
-    { href: "/waypoints", label: "Bubblers" },
-    { href: "/", label: "Maps" },
-
-    //   { href: "/settings", label: "Settings", auth: true },
-  ]
-
-  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
+// Define NavLinks component outside of render to avoid recreation on each render
+function NavLinks({ mobile = false, pathname, session, items }: { 
+  mobile?: boolean
+  pathname: string | null
+  session: ReturnType<typeof useSession>["data"]
+  items: Array<{ href: string; label: string; auth?: boolean }>
+}) {
+  return (
     <nav className={cn("flex items-center gap-1", mobile && "flex-col items-stretch gap-2")}>
       {items
         .filter((i) => !i.auth || !!session)
@@ -54,6 +49,19 @@ export default function Header() {
         })}
     </nav>
   )
+}
+
+export default function Header() {
+  const pathname = usePathname()
+  const { data: session } = useSession()
+
+  const items: Array<{ href: string; label: string; auth?: boolean }> = [
+    { href: "/home", label: "Home" },
+    { href: "/waypoints", label: "Bubblers" },
+    { href: "/", label: "Maps" },
+
+    //   { href: "/settings", label: "Settings", auth: true },
+  ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -74,7 +82,7 @@ export default function Header() {
                     <Droplet className="h-5 w-5 text-primary fill-current" />
                     <span className="font-bold">bubblymaps</span>
                   </SheetTitle>
-                  <NavLinks mobile />
+                  <NavLinks mobile pathname={pathname} session={session} items={items} />
                 </SheetContent>
               </Sheet>
             </div>
@@ -89,7 +97,7 @@ export default function Header() {
 
           {/* Center: Nav (desktop) */}
           <div className="hidden lg:flex">
-            <NavLinks />
+            <NavLinks pathname={pathname} session={session} items={items} />
           </div>
 
           {/* Right: Actions */}
