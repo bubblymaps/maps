@@ -43,8 +43,9 @@ export class Discord {
         const text = await res.text();
         throw new Error(`Discord webhook failed: ${res.status} ${text}`);
       }
-    } catch (err: any) {
-      throw new Error(err.message || "Failed to send Discord message");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to send Discord message";
+      throw new Error(errorMessage);
     }
   }
 }

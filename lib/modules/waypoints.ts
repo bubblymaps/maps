@@ -36,8 +36,8 @@ export class Waypoints {
         bubblerId: number,
         userId: string | null,
         action: "CREATE" | "UPDATE" | "DELETE",
-        oldData?: any,
-        newData?: any
+        oldData?: Record<string, unknown> | null,
+        newData?: Record<string, unknown> | null
     ) {
         return prisma.bubblerLog.create({
             data: {
@@ -84,8 +84,9 @@ export class Waypoints {
             });
             if (!bubbler) throw new Error("Bubbler not found");
             return bubbler;
-        } catch (err: any) {
-            throw new Error(err.message || "There was an issue fetching this bubbler");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "There was an issue fetching this bubbler";
+            throw new Error(errorMessage);
         }
     }
 
@@ -137,8 +138,9 @@ export class Waypoints {
             await this.logChange(id, userId ?? oldBubbler.addedByUserId, "DELETE", oldBubbler, null);
 
             return deletedBubbler;
-        } catch (err: any) {
-            throw new Error(err.message || "There was an issue deleting this waypoint");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "There was an issue deleting this waypoint";
+            throw new Error(errorMessage);
         }
     }
 
@@ -156,8 +158,9 @@ export class Waypoints {
 
             return updatedBubbler;
 
-        } catch (err: any) {
-            throw new Error(err.message || "There was an issue updating this waypoint");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "There was an issue updating this waypoint";
+            throw new Error(errorMessage);
         }
     }
 
@@ -167,8 +170,9 @@ export class Waypoints {
                 where: { id: bubblerId },
                 data: { approved: true },
             });
-        } catch (err: any) {
-            throw new Error(err.message || "Could not approve bubbler");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Could not approve bubbler";
+            throw new Error(errorMessage);
         }
     }
 
@@ -178,8 +182,9 @@ export class Waypoints {
                 where: { id: bubblerId },
                 data: { approved: false },
             });
-        } catch (err: any) {
-            throw new Error(err.message || "Could not unapprove bubbler");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Could not unapprove bubbler";
+            throw new Error(errorMessage);
         }
     }
 
@@ -189,8 +194,9 @@ export class Waypoints {
                 where: { id: bubblerId },
                 data: { verified: true },
             });
-        } catch (err: any) {
-            throw new Error(err.message || "Could not verify bubbler");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Could not verify bubbler";
+            throw new Error(errorMessage);
         }
     }
 
@@ -200,8 +206,9 @@ export class Waypoints {
                 where: { id: bubblerId },
                 data: { verified: false },
             });
-        } catch (err: any) {
-            throw new Error(err.message || "Could not unverify bubbler");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Could not unverify bubbler";
+            throw new Error(errorMessage);
         }
     }
 

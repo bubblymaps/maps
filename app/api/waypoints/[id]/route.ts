@@ -16,8 +16,9 @@ export async function GET(req: Request,
     if (!waypoint) return NextResponse.json({ error: "Waypoint not found" }, { status: 404 });
 
     return NextResponse.json({ waypoint, logs: waypointLogs });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch waypoint";
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
 
@@ -47,7 +48,10 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
     const filteredData: Partial<WaypointUpdateData> = {};
     for (const key of allowedFields) {
-      if (key in data) filteredData[key as keyof WaypointUpdateData] = data[key as keyof WaypointUpdateData] as any;
+      if (key in data) {
+        const typedKey = key as keyof WaypointUpdateData;
+        filteredData[typedKey] = data[typedKey];
+      }
     }
 
     // Get the userId from session, or use 'api' if authenticated via API token
@@ -55,8 +59,9 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     const updatedWaypoint = await Waypoints.edit(id, filteredData as WaypointUpdateData, userId);
     
     return NextResponse.json(updatedWaypoint);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to update waypoint";
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
 
@@ -76,7 +81,8 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
 
     const deletedWaypoint = await Waypoints.delete(id);
     return NextResponse.json(deletedWaypoint);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to delete waypoint";
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }

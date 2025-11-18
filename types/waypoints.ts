@@ -35,7 +35,7 @@ export interface WaypointLog {
   bubblerId: number
   userId?: string | null
   action: string
-  oldData?: Record<string, any> | null
-  newData?: Record<string, any> | null
+  oldData?: Record<string, unknown> | null
+  newData?: Record<string, unknown> | null
   createdAt: string | Date
 }

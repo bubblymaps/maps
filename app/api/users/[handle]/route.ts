@@ -23,7 +23,8 @@ export async function GET(
         };
         
         return NextResponse.json(userFiltered, { status: 200 });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 500 });
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to fetch user";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

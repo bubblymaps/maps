@@ -27,7 +27,7 @@ export default function HomePage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
         if (mounted) setStats(data)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to load stats', err)
       } finally {
         if (mounted) setLoadingStats(false)
@@ -53,7 +53,7 @@ export default function HomePage() {
       const lon = parseFloat(place.lon)
       // navigate to root with lat/lng
       router.push(`/?lat=${lat}&lng=${lon}&zoom=14`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Geocode failed', err)
       toast.error('Failed to geocode address')
     }

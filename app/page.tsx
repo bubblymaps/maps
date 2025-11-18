@@ -86,7 +86,12 @@ export default function Page() {
           setCurrentPopup(null)
         }
 
-        let full: any = item
+        // Item might have minimal fields, so fetch full details
+        interface FullWaypoint extends Waypoint {
+          [key: string]: unknown
+        }
+        
+        let full: FullWaypoint = item as FullWaypoint
         try {
           const res = await fetch(`/api/waypoints/${item.id}`)
           if (res.ok) {
@@ -116,7 +121,8 @@ export default function Page() {
         }
 
         popup.on("close", handleClose)
-          ; (popup as any)._closeHandler = handleClose
+        // Store close handler on popup object
+        ; (popup as maplibregl.Popup & { _closeHandler?: () => void })._closeHandler = handleClose
 
         setCurrentPopup(popup)
       })()
@@ -203,7 +209,7 @@ export default function Page() {
             .getClusterExpansionZoom(clusterId)
             .then((zoom: number) => {
               map.easeTo({
-                center: (features[0].geometry as any).coordinates as [number, number],
+                center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
                 zoom,
                 duration: 500,
               })
@@ -238,7 +244,8 @@ export default function Page() {
           }
 
           popup.on("close", handleClose)
-            ; (popup as any)._closeHandler = handleClose
+          // Store close handler on popup object
+          ; (popup as maplibregl.Popup & { _closeHandler?: () => void })._closeHandler = handleClose
 
           setCurrentPopup(popup)
         })
@@ -261,9 +268,10 @@ export default function Page() {
 
         console.log("Waypoints loaded.")
 
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         console.error(err)
-        toast.error(`Failed to load waypoints: ${err.message}`)
+        toast.error(`Failed to load waypoints: ${errorMessage}`)
       }
     }
 

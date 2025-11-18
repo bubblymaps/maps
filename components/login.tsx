@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -22,7 +22,13 @@ export default function Login({
 }: LoginCardProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  
+  // Handle mounting without effect
+  useLayoutEffect(() => {
+    setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   const isDark = mounted ? resolvedTheme === "dark" : false;
   // Until the client mounts and theme is resolved, show a neutral spinner to avoid a flash
   if (!mounted) {

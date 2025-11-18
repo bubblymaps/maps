@@ -21,9 +21,10 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ reviews });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch reviews";
     console.error(err);
-    return NextResponse.json({ error: err.message || "Failed to fetch reviews" }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -43,9 +44,10 @@ export async function POST(req: NextRequest) {
     const newReview = await Reviews.add(reviewData);
 
     return NextResponse.json({ review: newReview }, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to add review";
     console.error(err);
-    return NextResponse.json({ error: err.message || "Failed to add review" }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -83,10 +85,11 @@ export async function DELETE(req: NextRequest) {
 
     const deletedReview = await Reviews.delete(reviewId)
     return NextResponse.json({ review: deletedReview })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to delete review";
     console.error(err)
     return NextResponse.json(
-      { error: err.message || "Failed to delete review" },
+      { error: errorMessage },
       { status: 500 }
     )
   }

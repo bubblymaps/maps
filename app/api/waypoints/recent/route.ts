@@ -14,9 +14,10 @@ export async function GET(req: Request) {
 		const recent = await Waypoints.recent(limit);
 
 		return NextResponse.json({ waypoints: recent });
-	} catch (err: any) {
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : "Failed to fetch recent waypoints";
 		console.error("Failed to fetch recent waypoints:", err);
-		return NextResponse.json({ error: err?.message || "Failed to fetch recent waypoints" }, { status: 500 });
+		return NextResponse.json({ error: errorMessage }, { status: 500 });
 	}
 }
 

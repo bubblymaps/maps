@@ -62,7 +62,7 @@ export async function getFileInfo(key: string) {
 }
 
 export function getFileUrl(key: string) {
-  const { s3, bucket } = s3Client()
+  const { bucket } = s3Client()
   const base = process.env.MINIO_URL!.replace(/\/$/, "")
   return `${base}/${bucket}/${key}`
 }

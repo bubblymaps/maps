@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useLayoutEffect, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { GeistSans, GeistMono } from "geist/font";
@@ -9,7 +9,10 @@ export default function Providers({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   // Wait until the component is mounted to avoid hydration mismatch
-  useEffect(() => setMounted(true), []);
+  useLayoutEffect(() => {
+    setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fontClasses = `${GeistSans.variable} ${GeistMono.variable}`;
 

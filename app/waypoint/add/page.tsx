@@ -75,13 +75,13 @@ export default function AddWaypointPage() {
     })
 
     // if tiles/style fail to load, switch to a public fallback so the map is visible
-    const onError = (err: any) => {
+    const onError = (err: unknown) => {
       // don't loop if fallback already applied
-      if ((mapInstance.current as any)?.__bubbly_fallback) return
+      if ((mapInstance.current as Map & { __bubbly_fallback?: boolean })?.__bubbly_fallback) return
       console.warn("Map load error, switching to fallback style:", err)
       try {
         setUsingFallbackTiles(true)
-        ;(mapInstance.current as any).__bubbly_fallback = true
+        ;(mapInstance.current as Map & { __bubbly_fallback?: boolean }).__bubbly_fallback = true
         mapInstance.current?.setStyle(fallbackStyle)
       } catch (e) {
         console.error("Failed to set fallback style:", e)
@@ -192,7 +192,18 @@ export default function AddWaypointPage() {
 
     setIsSubmitting(true)
     try {
-      const payload: any = {
+      interface WaypointPayload {
+        name: string
+        latitude: number
+        longitude: number
+        description: string
+        amenities: string[]
+        region: string
+        maintainer?: string
+        image?: string
+      }
+      
+      const payload: WaypointPayload = {
         name,
         latitude: lat,
         longitude: lng,
@@ -228,9 +239,10 @@ export default function AddWaypointPage() {
       setTimeout(() => {
         window.location.href = `/waypoint/${result.id}`
       }, 1500)
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       console.error(err)
-      toast.error(`Failed to submit: ${err.message || err}`)
+      toast.error(`Failed to submit: ${errorMessage}`)
       setIsSubmitting(false)
     }
   }

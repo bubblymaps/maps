@@ -19,6 +19,15 @@ interface SearchBarProps {
   className?: string
 }
 
+interface WaypointSearchResult {
+  id: number
+  name: string
+  latitude: number
+  longitude: number
+  verified: boolean
+  approved: boolean
+}
+
 export function SearchBar({
   placeholder = "Search...",
   value,
@@ -29,25 +38,25 @@ export function SearchBar({
   className,
 }: SearchBarProps) {
   // Support both controlled and uncontrolled usage.
+  // Use a ref to track if we're in controlled mode
+  const isControlled = value !== undefined
   const [internal, setInternal] = useState(value ?? "")
-
-  useEffect(() => {
-    // Keep internal state in sync when used as controlled
-    if (value !== undefined) setInternal(value)
-  }, [value])
+  
+  // In controlled mode, always use the external value
+  const displayValue = isControlled ? value : internal
 
   const handleInputChange = (val: string) => {
-    if (value === undefined) setInternal(val)
+    if (!isControlled) setInternal(val)
     onChange?.(val)
   }
 
   const handleClear = () => {
-    if (value === undefined) setInternal("")
+    if (!isControlled) setInternal("")
     onChange?.("")
   }
 
   const handleSearch = () => {
-    onSearch?.(value ?? internal)
+    onSearch?.(displayValue)
   }
 
   const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -76,10 +85,10 @@ export function SearchBar({
       <input
         type="text"
         placeholder={placeholder}
-        value={value ?? internal}
+        value={displayValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleLocalKeyDown}
-        ref={inputRef as any}
+        ref={inputRef}
         className="flex-1 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground truncate"
       />
 
@@ -90,7 +99,7 @@ export function SearchBar({
         aria-label="Clear search"
         className={cn(
           "mr-3 text-muted-foreground hover:text-foreground transition-opacity cursor-pointer",
-          (value ?? internal) ? "opacity-100" : "opacity-0 pointer-events-none",
+          displayValue ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
       >
         <X className="h-4 w-4" />
@@ -100,13 +109,13 @@ export function SearchBar({
 }
 
 interface WaypointSearchProps {
-  onSelect?: (item: any) => void
+  onSelect?: (item: WaypointSearchResult) => void
   placeholder?: string
 }
 
 export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }: WaypointSearchProps) {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Array<any>>([])
+  const [results, setResults] = useState<WaypointSearchResult[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [loading, setLoading] = useState(false)
@@ -157,7 +166,7 @@ export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }
         setOpen(true)
         setActiveIndex(-1)
       } catch (err) {
-        if ((err as any).name === 'AbortError') return
+        if (err instanceof Error && err.name === 'AbortError') return
         console.error(err)
         setResults([])
         setOpen(true)
@@ -172,7 +181,7 @@ export function WaypointSearch({ onSelect, placeholder = "Search waypoints..." }
     }
   }, [query])
 
-  const handleSelect = (item: any) => {
+  const handleSelect = (item: WaypointSearchResult) => {
     // Fill input with selection but suppress re-query opening
     setQuery(item.name)
     setOpen(false)

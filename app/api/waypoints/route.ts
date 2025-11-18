@@ -82,7 +82,7 @@ export async function POST(req: Request) {
       allowedFields.push("approved", "verified", "addedByUserId");
     }
 
-    const filteredData: any = {};
+    const filteredData: Partial<WaypointData> = {};
     for (const field of allowedFields) {
       if (data[field] !== undefined) filteredData[field] = data[field];
     }
@@ -117,10 +117,11 @@ export async function POST(req: Request) {
     const newWaypoint = await Waypoints.add(filteredData as WaypointData);
 
     return NextResponse.json(newWaypoint, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to create waypoint";
     console.error("Error creating waypoint:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to create waypoint" },
+      { error: errorMessage },
       { status: 400 }
     );
   }

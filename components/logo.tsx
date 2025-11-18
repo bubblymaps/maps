@@ -2,14 +2,17 @@
 
 import Image from "next/image"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 
 export function Logo() {
     const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
 
-    // Avoid hydration mismatch by waiting until mounted
-    useEffect(() => setMounted(true), [])
+    // Use useLayoutEffect for synchronous mounting
+    useLayoutEffect(() => {
+        setMounted(true)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const isDark = (resolvedTheme ?? 'light') === 'dark'
 

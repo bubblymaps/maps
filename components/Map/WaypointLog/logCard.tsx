@@ -22,7 +22,7 @@ export default function WaypointLogCard({ log }: WaypointLogCardProps) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
   }
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return "—"
     if (typeof value === "boolean") return value ? "Yes" : "No"
     if (Array.isArray(value)) return value.length > 0 ? value.join(", ") : "None"

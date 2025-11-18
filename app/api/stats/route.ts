@@ -15,8 +15,9 @@ export async function GET() {
 			{ totalWaypoints, totalVerifiedWaypoints, totalUsers, totalReviews, totalContributions },
 			{ status: 200 }
 		);
-	} catch (err: any) {
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : "Failed to fetch stats";
 		console.error("Failed to fetch stats:", err);
-		return NextResponse.json({ error: err?.message || "Failed to fetch stats" }, { status: 500 });
+		return NextResponse.json({ error: errorMessage }, { status: 500 });
 	}
 }
