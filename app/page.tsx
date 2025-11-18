@@ -40,6 +40,16 @@ interface Waypoint {
   updatedAt: string // or Date, depending on your backend
 }
 
+interface WaypointSearchResult {
+  id: number
+  name: string
+  latitude: number
+  longitude: number
+  verified: boolean
+  approved: boolean
+}
+
+
 export default function Page() {
   const { theme } = useTheme()
   const [map, setMap] = useState<Map | null>(null)
@@ -74,7 +84,7 @@ export default function Page() {
     router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
   }
 
-  const handleSelectWaypoint = (item: Waypoint) => {
+  const handleSelectWaypoint = (item: WaypointSearchResult) => {
     if (!map) return
       ; (async () => {
         if (currentPopup) {

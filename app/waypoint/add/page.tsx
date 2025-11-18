@@ -77,11 +77,11 @@ export default function AddWaypointPage() {
     // if tiles/style fail to load, switch to a public fallback so the map is visible
     const onError = (err: unknown) => {
       // don't loop if fallback already applied
-      if ((mapInstance.current as Map & { __bubbly_fallback?: boolean })?.__bubbly_fallback) return
+      if ((mapInstance.current as any)?.__bubbly_fallback) return
       console.warn("Map load error, switching to fallback style:", err)
       try {
         setUsingFallbackTiles(true)
-        ;(mapInstance.current as Map & { __bubbly_fallback?: boolean }).__bubbly_fallback = true
+        ;(mapInstance.current as any).__bubbly_fallback = true
         mapInstance.current?.setStyle(fallbackStyle)
       } catch (e) {
         console.error("Failed to set fallback style:", e)

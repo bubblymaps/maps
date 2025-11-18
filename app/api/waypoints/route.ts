@@ -82,7 +82,7 @@ export async function POST(req: Request) {
       allowedFields.push("approved", "verified", "addedByUserId");
     }
 
-    const filteredData: Partial<WaypointData> = {};
+     const filteredData: any = {};
     for (const field of allowedFields) {
       if (data[field] !== undefined) filteredData[field] = data[field];
     }

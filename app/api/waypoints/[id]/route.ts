@@ -48,10 +48,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
     const filteredData: Partial<WaypointUpdateData> = {};
     for (const key of allowedFields) {
-      if (key in data) {
-        const typedKey = key as keyof WaypointUpdateData;
-        filteredData[typedKey] = data[typedKey];
-      }
+      if (key in data) filteredData[key as keyof WaypointUpdateData] = data[key as keyof WaypointUpdateData] as any;
     }
 
     // Get the userId from session, or use 'api' if authenticated via API token

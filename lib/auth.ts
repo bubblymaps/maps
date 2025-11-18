@@ -1,4 +1,4 @@
-import NextAuth, { AuthOptions } from "next-auth"
+import NextAuth, { type AuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "./prisma"
@@ -18,7 +18,7 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 
   callbacks: {
-    async session({ session, user }) {
+    async session({ session, user }: { session: any; user: any }) {
       if (session.user) {
         session.user.id = user.id;
         session.user.handle = user.handle;
@@ -34,7 +34,7 @@ export const authOptions: AuthOptions = {
   },
 
   events: {
-    createUser: async ({ user }) => {
+    createUser: async ({ user }: { user: any }) => {
       const emailOptions = {
         to: user.email!,
         subject: "Welcome to Bubbly Maps!",

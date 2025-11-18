@@ -36,8 +36,8 @@ export class Waypoints {
         bubblerId: number,
         userId: string | null,
         action: "CREATE" | "UPDATE" | "DELETE",
-        oldData?: Record<string, unknown> | null,
-        newData?: Record<string, unknown> | null
+        oldData?: any,
+        newData?: any
     ) {
         return prisma.bubblerLog.create({
             data: {
@@ -146,23 +146,33 @@ export class Waypoints {
 
     static async edit(id: number, data: WaypointUpdateData, userId: string | null = null) {
         const oldBubbler = await this.get(id);
+
+        // Filter out undefined values
+        const filteredData: Partial<WaypointUpdateData> = Object.fromEntries(
+            Object.entries(data).filter(([_, value]) => value !== undefined)
+        ) as Partial<WaypointUpdateData>;
+
         try {
-            const updatedBubbler = await prisma.bubbler.update(
-                {
-                    where: { id },
-                    data,
-                }
+            const updatedBubbler = await prisma.bubbler.update({
+                where: { id },
+                data: filteredData,
+            });
+
+            await this.logChange(
+                id,
+                userId ?? oldBubbler.addedByUserId,
+                "UPDATE",
+                oldBubbler,
+                updatedBubbler
             );
 
-            await this.logChange(id, userId ?? oldBubbler.addedByUserId, "UPDATE", oldBubbler, updatedBubbler);
-
             return updatedBubbler;
-
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : "There was an issue updating this waypoint";
             throw new Error(errorMessage);
         }
     }
+
 
     static async approve(bubblerId: number) {
         try {
