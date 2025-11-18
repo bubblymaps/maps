@@ -44,8 +44,8 @@ export class Waypoints {
                 bubblerId,
                 userId,
                 action,
-                oldData: oldData || null,
-                newData: newData || null,
+                oldData: oldData ? JSON.parse(JSON.stringify(oldData)) : undefined,
+                newData: newData ? JSON.parse(JSON.stringify(newData)) : undefined,
             },
         });
     }
@@ -153,7 +153,7 @@ export class Waypoints {
                     data,
                 }
             );
-            
+
             await this.logChange(id, userId ?? oldBubbler.addedByUserId, "UPDATE", oldBubbler, updatedBubbler);
 
             return updatedBubbler;
