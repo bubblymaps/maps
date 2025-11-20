@@ -1,8 +1,16 @@
 # Bubbly Maps
 
-A modern maps app for locating public water fountains locations. https://bubblymaps.org.
+A maps app for locating public water fountains locations. https://bubblymaps.org.
 
-## Self host
+### Website Terms
+
+https://bubblymaps.org/terms
+
+### Website Privacy Policy
+
+https://bubblymaps.org/privacy
+
+# Self host
 
 ### Build from source
 
