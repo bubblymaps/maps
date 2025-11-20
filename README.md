@@ -3,15 +3,6 @@
 A modern maps app for locating public water fountains locations. https://bubblymaps.org.
 
 ## Self host
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** 20.x or higher
-- **npm** or other package manager (yarn, pnpm, bun)
-- **Docker** and **Docker Compose** (for containerized deployment)
-- **PostgreSQL** database (local or remote)
-- **Git**
 
 ### Build from source
 
