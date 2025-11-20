@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { Star, StarHalf } from "lucide-react"
 import { toast } from "sonner"
+import AIReviewSummaryCompact from "@/components/Ai/compact.summary"
 
 interface Props {
   waypoint: Waypoint
 }
 
 export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
-  const [reviews, setReviews] = useState<{ rating: number }[]>([])
+  const [reviews, setReviews] = useState<{ rating: number; comment?: string }[]>([])
   const [avgRating, setAvgRating] = useState(0)
 
   useEffect(() => {
@@ -111,6 +112,12 @@ export const WaypointPopup: React.FC<Props> = ({ waypoint }) => {
           <div className="flex items-center gap-2 mt-1">
             {renderStars(avgRating)}
             <span className="text-sm font-medium text-foreground/80">({reviews.length})</span>
+          </div>
+        )}
+
+        {reviews.length > 0 && (
+          <div className="relative group">
+            <AIReviewSummaryCompact reviews={reviews.filter(r => r.comment).map(r => ({ rating: r.rating, comment: r.comment! }))} />
           </div>
         )}
 
