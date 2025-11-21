@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Reviews, ReviewData } from "@/lib/modules/reviews";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth/next";
+import { awardXP } from "@/lib/xp";
 
 export async function GET(req: NextRequest) {
   try {
@@ -42,6 +43,9 @@ export async function POST(req: NextRequest) {
 
     const reviewData: ReviewData = { bubblerId, rating, comment, userId };
     const newReview = await Reviews.add(reviewData);
+
+    // Award XP for adding a review
+    await awardXP(userId, 'ADD_REVIEW');
 
     return NextResponse.json({ review: newReview }, { status: 201 });
   } catch (err: unknown) {

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Waypoints, WaypointUpdateData } from "@/lib/modules/waypoints";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { awardXP, canEditWaypoint } from "@/lib/xp";
+import { XP_REQUIRED } from "@/lib/xp-config";
 
 export async function GET(req: Request,
   context: { params: Promise<{ id: string }> }
@@ -53,7 +55,24 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
     // Get the userId from session, or use 'api' if authenticated via API token
     const userId = session?.user?.id || (hasApiToken ? 'api' : null);
+
+    // Enforce XP requirement for editing a waypoint (for authenticated users)
+    if (session?.user?.id) {
+      const allowed = await canEditWaypoint(session.user.id);
+      if (!allowed) {
+        return NextResponse.json(
+          { error: `Insufficient XP to edit this waypoint. Required: ${XP_REQUIRED.EDIT_WAYPOINT}` },
+          { status: 403 }
+        );
+      }
+    }
+
     const updatedWaypoint = await Waypoints.edit(id, filteredData as WaypointUpdateData, userId);
+    
+    // Award XP for editing a waypoint (only for authenticated users, not API)
+    if (session?.user?.id) {
+      await awardXP(session.user.id, 'EDIT_WAYPOINT');
+    }
     
     return NextResponse.json(updatedWaypoint);
   } catch (err: unknown) {

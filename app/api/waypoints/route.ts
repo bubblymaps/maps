@@ -3,6 +3,8 @@ import { Waypoints, WaypointData } from "@/lib/modules/waypoints";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { awardXP, canCreateWaypoint } from "@/lib/xp";
+import { XP_REQUIRED } from "@/lib/xp-config";
 
 // /api/waypoints → all waypoints (ordered by createdAt DESC)
 // /api/waypoints?userId=linuskang → all waypoints by specific user
@@ -93,6 +95,17 @@ export async function POST(req: Request) {
       filteredData.addedByUserId = data.addedByUserId ?? "api";
     }
 
+    // Enforce XP requirement for creating a waypoint for authenticated users
+    if (session?.user?.id) {
+      const allowed = await canCreateWaypoint(session.user.id);
+      if (!allowed) {
+        return NextResponse.json(
+          { error: `Insufficient XP to create a waypoint. Required: ${XP_REQUIRED.CREATE_WAYPOINT}` },
+          { status: 403 }
+        );
+      }
+    }
+
 
     const requiredFields: (keyof WaypointData)[] = [
       "name",
@@ -115,6 +128,11 @@ export async function POST(req: Request) {
     }
 
     const newWaypoint = await Waypoints.add(filteredData as WaypointData);
+
+    // Award XP for creating a waypoint (only for authenticated users, not API)
+    if (session?.user?.id) {
+      await awardXP(session.user.id, 'CREATE_WAYPOINT');
+    }
 
     return NextResponse.json(newWaypoint, { status: 201 });
   } catch (err: unknown) {
