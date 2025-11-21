@@ -7,7 +7,7 @@ import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Bubbly Maps",
-  description: "The open-source fountain repository, mapping the world's bubblers.",
+  description: "The open source bubbler map. Open Code, Open Data.",
 };
 
 export default function RootLayout({

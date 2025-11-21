@@ -19,6 +19,18 @@ interface ProfilePageParams {
   params: Promise<{ handle: string }>
 }
 
+export const metadata = {
+  title: "Profile | Bubbly Maps",
+  description: "View the profile and contributions of a Bubbly Maps user.",
+  openGraph: {
+    title: "Profile | Bubbly Maps",
+    description: "View the profile and contributions of a Bubbly Maps user.",
+    url: "https://bubblymaps.org/profile",
+    siteName: "Bubbly Maps",
+    type: "website",
+  },
+};
+
 export default async function ProfilePage({ params }: ProfilePageParams) {
   const { handle } = await params
   const user = await Users.getUserByUsername(handle)

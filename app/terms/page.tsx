@@ -3,7 +3,19 @@ import Link from "next/link"
 import { Footer } from "@/components/footer"
 import Header from "@/components/header"
 
-export default function EnhancedTermsPage() {
+export const metadata = {
+  title: "Terms of Service | Bubbly Maps",
+  description: "Read the terms and conditions for using Bubbly Maps.",
+  openGraph: {
+    title: "Terms of Service | Bubbly Maps",
+    description: "Read the terms and conditions for using Bubbly Maps.",
+    url: "https://bubblymaps.org/terms",
+    siteName: "Bubbly Maps",
+    type: "website",
+  },
+};
+
+export default function TermsPage() {
     return (
         <div className="min-h-screen bg-background">
             <Header />

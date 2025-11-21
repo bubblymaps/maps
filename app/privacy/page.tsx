@@ -3,7 +3,19 @@ import Link from "next/link"
 import { Footer } from "@/components/footer"
 import Header from "@/components/header"
 
-export default function EnhancedPrivacyPage() {
+export const metadata = {
+  title: "Privacy Policy | Bubbly Maps",
+  description: "Read about how we handle your data and protect your privacy on Bubbly Maps.",
+  openGraph: {
+    title: "Privacy Policy | Bubbly Maps",
+    description: "Read about how we handle your data and protect your privacy on Bubbly Maps.",
+    url: "https://bubblymaps.org/privacy",
+    siteName: "Bubbly Maps",
+    type: "website",
+  },
+};
+
+export default function PrivacyPage() {
     return (
         <div className="min-h-screen bg-background">
             <Header />
