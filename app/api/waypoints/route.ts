@@ -80,7 +80,8 @@ export async function POST(req: Request) {
       "region",
     ];
 
-    if (hasApiToken) {
+    // Allow API token or moderator users to set admin-only fields
+    if (hasApiToken || session?.user?.moderator) {
       allowedFields.push("approved", "verified", "addedByUserId");
     }
 

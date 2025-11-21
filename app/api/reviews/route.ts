@@ -73,7 +73,8 @@ export async function DELETE(req: NextRequest) {
     const authHeader = req.headers.get("authorization")
     const token = authHeader?.split(" ")[1]
 
-    if (token && token === process.env.API_KEY) {
+    const apiTokenMatches = token && (token === process.env.API_KEY || token === process.env.API_TOKEN)
+    if (apiTokenMatches) {
       const deletedReview = await Reviews.delete(reviewId)
       return NextResponse.json({ review: deletedReview })
     }
@@ -81,6 +82,12 @@ export async function DELETE(req: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Allow moderators to delete any review
+    if (session.user.moderator) {
+      const deletedReview = await Reviews.delete(reviewId)
+      return NextResponse.json({ review: deletedReview })
     }
 
     if (review.userId !== session.user.id) {

@@ -46,7 +46,8 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       "amenities", "image", "maintainer", "region"
     ];
 
-    if (hasApiToken) allowedFields.push("approved", "verified", "addedByUserId");
+    // Allow API token or moderator users to set admin-only fields
+    if (hasApiToken || session?.user?.moderator) allowedFields.push("approved", "verified", "addedByUserId");
 
     const filteredData: Partial<WaypointUpdateData> = {};
     for (const key of allowedFields) {
@@ -91,11 +92,13 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
   const expectedToken = process.env.API_TOKEN || process.env.API_KEY;
   const hasApiToken = !!apiToken && !!expectedToken && apiToken === expectedToken;
 
-    if (!hasApiToken) {
-      return NextResponse.json({ error: "Unauthorized — valid API token required" }, { status: 401 });
+    // Allow moderators (session) or API token holders to delete waypoints
+    const session = await getServerSession(authOptions);
+    if (!hasApiToken && !session?.user?.moderator) {
+      return NextResponse.json({ error: "Unauthorized — valid API token or moderator required" }, { status: 401 });
     }
 
-    const deletedWaypoint = await Waypoints.delete(id);
+    const deletedWaypoint = await Waypoints.delete(id, session?.user?.id ?? 'api');
     return NextResponse.json(deletedWaypoint);
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Failed to delete waypoint";

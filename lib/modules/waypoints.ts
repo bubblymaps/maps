@@ -129,13 +129,16 @@ export class Waypoints {
     static async delete(id: number, userId: string | null = null) {
         try {
             const oldBubbler = await this.get(id);
-            const deletedBubbler = await prisma.bubbler.delete(
-                {
-                    where: { id },
-                }
-            );
+            const deletedBubbler = await prisma.bubbler.delete({ where: { id } });
 
-            await this.logChange(id, userId ?? oldBubbler.addedByUserId, "DELETE", oldBubbler, null);
+            // Try to log the deletion, but do not fail the whole operation if logging errors occur.
+            try {
+                await this.logChange(id, userId ?? oldBubbler.addedByUserId, "DELETE", oldBubbler, null);
+            } catch (logErr) {
+                // Log the error server-side for later inspection, but continue.
+                // eslint-disable-next-line no-console
+                console.error(`Waypoints.delete: failed to write bubblerLog for id=${id}:`, logErr);
+            }
 
             return deletedBubbler;
         } catch (err: unknown) {
