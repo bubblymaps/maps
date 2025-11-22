@@ -29,6 +29,12 @@ For easy deployment, use Docker Compose:
 docker compose up -d
 ```
 
+## Documentation
+
+- [API Documentation](docs/API.md) - Comprehensive guide to all API endpoints, authentication, headers, and request/response formats
+- [XP System](docs/XP-SYSTEM.md) - Details about the experience points system
+- [CI/CD](docs/CI-CD.md) - Continuous integration and deployment information
+
 ## License
 
 See [LICENSE](LICENSE) file for details.
