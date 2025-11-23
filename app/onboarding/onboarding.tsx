@@ -217,7 +217,7 @@ export default function Onboarding() {
                                 type="button"
                             >
                                 <Upload className="h-4 w-4" />
-                                Upload Photo (Optional)
+                                Upload Avatar
                             </Button>
                         </motion.div>
 
