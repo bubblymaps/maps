@@ -16,6 +16,10 @@ export const authOptions: AuthOptions = {
     strategy: "database",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/signin",
+    newUser: "/onboarding",
+  },
 
   callbacks: {
     async session({ session, user }: { session: any; user: any }) {
@@ -30,6 +34,10 @@ export const authOptions: AuthOptions = {
         session.user.name = user.name;
       }
       return session;
+    },
+    async signIn({ user }: { user: any }) {
+      // Allow sign in to proceed
+      return true;
     },
   },
 
