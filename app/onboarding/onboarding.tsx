@@ -66,7 +66,7 @@ export default function Onboarding() {
             return false
         }
         if (value.length > 20) {
-            setUsernameError("Username must be less than 20 characters")
+            setUsernameError("Username must be 20 characters or less")
             return false
         }
         if (!/^[a-zA-Z0-9_]+$/.test(value)) {
@@ -125,7 +125,7 @@ export default function Onboarding() {
 
             if (!res.ok) {
                 const errorData = await res.json()
-                throw new Error(errorData.msg || "Failed to update profile")
+                throw new Error(errorData.msg || errorData.message || errorData.error || "Failed to update profile")
             }
 
             await update()
