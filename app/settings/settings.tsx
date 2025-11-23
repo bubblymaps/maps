@@ -21,15 +21,16 @@ export default function Page() {
     const [avatarUrl, setAvatarUrl] = useState(session?.user.image ?? "")
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const router = useRouter();
-    const isSignedIn = !!session;
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/signin");
+        } else if (status === "authenticated" && !session?.user?.handle) {
+            router.push("/onboarding");
         }
-    }, [status, router]);
+    }, [status, session, router]);
 
     useEffect(() => {
         if (session?.user) {
