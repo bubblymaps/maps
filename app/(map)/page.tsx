@@ -1,7 +1,6 @@
 "use client"
 
 import "maplibre-gl/dist/maplibre-gl.css"
-import type { GeoJSON } from "geojson"
 import maplibregl from "maplibre-gl"
 
 import { useState } from "react"
@@ -24,21 +23,10 @@ import { Watermark } from "@/components/Map/watermark"
 import { Attribution } from "@/components/Map/attribution"
 import { MapScale } from "@/components/Map/scale"
 import { ZoomControl } from "@/components/Map/zoom"
-import { SearchBar, WaypointSearch } from "@/components/Map/search"
+import { WaypointSearch } from "@/components/Map/search"
 import { AvatarManager } from "@/components/account"
-import Header from "@/components/header"
 
-interface Waypoint {
-  id: number
-  name: string
-  latitude: number
-  longitude: number
-  verified: boolean
-  approved: boolean
-  amenities: string[] // or the correct type if different
-  createdAt: string // or Date, depending on your backend
-  updatedAt: string // or Date, depending on your backend
-}
+import type { Waypoint } from "@/types/waypoints"
 
 interface WaypointSearchResult {
   id: number
@@ -48,7 +36,6 @@ interface WaypointSearchResult {
   verified: boolean
   approved: boolean
 }
-
 
 export default function Page() {
   const { theme } = useTheme()
