@@ -2,16 +2,16 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const token = await getToken({ req: request })
   const { pathname } = request.nextUrl
 
-  // If user is authenticated
   if (token) {
-    // If user has a handle and is trying to access onboarding, redirect to home
+
     if (token.handle && pathname === "/onboarding") {
       return NextResponse.redirect(new URL("/home", request.url))
     }
+    
   }
 
   return NextResponse.next()
