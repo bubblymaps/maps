@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     description:
       "Locate water bubblers and drinking taps near you. Open-source, community powered hydration map.",
     url: "https://bubblymaps.org",
-    siteName: "Bubbly Maps",
+    siteName: "Bubbly Maps - Find water bubblers near you",
     images: [
       {
         url: "/logo.png",
