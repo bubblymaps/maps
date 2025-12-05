@@ -4,6 +4,14 @@ A maps app for locating public water fountains locations. Access it [here](https
 
 # Self host
 
+### Prerequisites
+
+- Postgresql
+- Node.js >= 24.1.0
+- npm >= 11.3.0
+- Docker >= 28.5.2
+- Minio
+
 ### Build from source
 
 1. Run the following commands to build from source
